@@ -23,6 +23,7 @@ from app.schemas import (
     HealthCheckResponse,
 )
 from app.routes.organizations import router as org_router
+from app.routes.telemetry import router as telemetry_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -48,6 +49,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(org_router)
+app.include_router(telemetry_router)
 
 # Global exception handler
 @app.exception_handler(NetZeroException)

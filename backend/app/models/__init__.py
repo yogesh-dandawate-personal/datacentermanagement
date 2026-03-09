@@ -440,3 +440,70 @@ class FacilityMetrics(Base):
     # Relationships
     facility = relationship("Facility", back_populates="metrics")
     tenant = relationship("Tenant")
+
+
+# Telemetry models for Sprint 4
+class TelemetryReading(Base):
+    """High-volume telemetry readings with time-series storage"""
+    __tablename__ = "telemetry_readings"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+    meter_id = Column(UUID(as_uuid=True), ForeignKey("meters.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    timestamp = Column(DateTime, nullable=False, index=True)
+    value = Column(Numeric(18, 6), nullable=False)
+    unit = Column(String(20))
+
+    status = Column(String(50), default="valid", index=True)  # valid, invalid, anomaly, stale
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    # Relationships
+    tenant = relationship("Tenant")
+    meter = relationship("Meter")
+
+
+class TelemetryValidationError(Base):
+    """Records validation errors from ingestion"""
+    __tablename__ = "telemetry_validation_errors"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+    meter_id = Column(UUID(as_uuid=True), ForeignKey("meters.id", ondelete="SET NULL"), nullable=True, index=True)
+
+    error_type = Column(String(100), nullable=False)  # validation_error, type_error, range_error, etc.
+    error_message = Column(Text)
+    source_data = Column(JSON)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+
+    # Relationships
+    tenant = relationship("Tenant")
+    meter = relationship("Meter")
+
+
+class TelemetryAnomaly(Base):
+    """Detected anomalies in telemetry data"""
+    __tablename__ = "telemetry_anomalies"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+    meter_id = Column(UUID(as_uuid=True), ForeignKey("meters.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    anomaly_timestamp = Column(DateTime, nullable=False, index=True)
+    anomaly_type = Column(String(100), nullable=False)  # stale_feed, outlier, spike, etc.
+
+    expected_value = Column(Numeric(18, 6))
+    actual_value = Column(Numeric(18, 6), nullable=False)
+
+    severity = Column(String(20), nullable=False)  # low, medium, high, critical
+    status = Column(String(50), default="open", index=True)  # open, acknowledged, resolved
+
+    resolution_notes = Column(Text)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+
+    # Relationships
+    tenant = relationship("Tenant")
+    meter = relationship("Meter")
