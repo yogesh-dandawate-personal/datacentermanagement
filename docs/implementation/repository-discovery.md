@@ -1,4 +1,4 @@
-# Repository Discovery Report: iCarbon ESG Platform
+# Repository Discovery Report: iNetZero ESG Platform
 
 **Date**: March 9, 2026
 **Repository**: datacentermanagement
@@ -444,7 +444,7 @@ JWT_ALGORITHM=HS256
 JWT_EXPIRATION_HOURS=24
 
 # API
-API_TITLE=iCarbon ESG Platform
+API_TITLE=iNetZero ESG Platform
 API_VERSION=1.0.0
 API_PORT=3000
 API_ENVIRONMENT=development

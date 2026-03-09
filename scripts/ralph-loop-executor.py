@@ -79,7 +79,7 @@ class RalphLoopExecutor:
         self.current_phase = RalphPhase.R0_RECEIVE
         self.current_sparc = SPARCPhase.SPECIFY
         self.start_time = datetime.now()
-        self.checkpoint_dir = Path(f"/.claude/agents/{agent_id}/checkpoints/{session_id}")
+        self.checkpoint_dir = Path(f"./.claude/agents/{agent_id}/checkpoints/{session_id}")
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
         # Setup logging
@@ -88,7 +88,7 @@ class RalphLoopExecutor:
 
     def _setup_logging(self) -> logging.Logger:
         """Setup logging for Ralph Loop execution"""
-        log_dir = Path(f"/.claude/agents/{self.agent_id}/logs")
+        log_dir = Path(f"./.claude/agents/{self.agent_id}/logs")
         log_dir.mkdir(parents=True, exist_ok=True)
 
         logger = logging.getLogger(f"ralph-{self.story_id}")

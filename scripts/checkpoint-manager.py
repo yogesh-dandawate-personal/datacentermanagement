@@ -48,14 +48,14 @@ class CheckpointManager:
         if checkpoint_dir:
             self.checkpoint_dir = Path(checkpoint_dir)
         else:
-            self.checkpoint_dir = Path(f"/.claude/agents/{agent_id}/checkpoints/{session_id}")
+            self.checkpoint_dir = Path(f"./.claude/agents/{agent_id}/checkpoints/{session_id}")
 
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
         self.logger = self._setup_logging()
 
     def _setup_logging(self) -> logging.Logger:
         """Setup logging"""
-        log_dir = Path(f"/.claude/agents/{self.agent_id}/logs")
+        log_dir = Path(f"./.claude/agents/{self.agent_id}/logs")
         log_dir.mkdir(parents=True, exist_ok=True)
 
         logger = logging.getLogger(f"checkpoint-{self.session_id}")

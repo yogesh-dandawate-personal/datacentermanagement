@@ -115,7 +115,7 @@ class ParallelTDDOrchestrator:
 
     def _setup_logging(self) -> logging.Logger:
         """Setup logging for orchestrator"""
-        log_dir = Path(f"/.claude/orchestrator/tdd-logs")
+        log_dir = Path(f"./.claude/orchestrator/tdd-logs")
         log_dir.mkdir(parents=True, exist_ok=True)
 
         logger = logging.getLogger("parallel-tdd")
@@ -435,7 +435,7 @@ class ParallelTDDOrchestrator:
     def save_execution_report(self, output_path: str = None):
         """Save execution report"""
         if not output_path:
-            output_path = f"/.claude/orchestrator/tdd-reports/execution_{self.execution_id}.json"
+            output_path = f"./.claude/orchestrator/tdd-reports/execution_{self.execution_id}.json"
 
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
         Path(output_path).write_text(json.dumps(self.get_execution_summary(), indent=2))

@@ -25,11 +25,11 @@ class ProgressReporter:
 
     def __init__(self):
         self.logger = self._setup_logging()
-        self.orchestrator_state_path = Path("/.claude/orchestrator/state.json")
+        self.orchestrator_state_path = Path("./.claude/orchestrator/state.json")
 
     def _setup_logging(self) -> logging.Logger:
         """Setup logging"""
-        log_dir = Path("/.claude/orchestrator/logs")
+        log_dir = Path("./.claude/orchestrator/logs")
         log_dir.mkdir(parents=True, exist_ok=True)
 
         logger = logging.getLogger("progress-reporter")
@@ -272,7 +272,7 @@ class DailyStandupGenerator:
         if not date:
             date = datetime.now().strftime("%Y-%m-%d")
 
-        output_dir = Path("/.claude/DAILY_REPORTS")
+        output_dir = Path("./.claude/DAILY_REPORTS")
         output_dir.mkdir(parents=True, exist_ok=True)
 
         output_path = output_dir / f"standup_{date}.md"

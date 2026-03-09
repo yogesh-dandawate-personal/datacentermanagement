@@ -75,7 +75,7 @@ class FrontendFirstOrchestrator:
 
     def _setup_logging(self) -> logging.Logger:
         """Setup logging"""
-        log_dir = Path("/.claude/orchestrator/logs")
+        log_dir = Path("./.claude/orchestrator/logs")
         log_dir.mkdir(parents=True, exist_ok=True)
 
         logger = logging.getLogger("frontend-first")
@@ -91,7 +91,7 @@ class FrontendFirstOrchestrator:
         self.logger.info(f"Generating mocks for Sprint {sprint_num}")
 
         # Load sprint assignments
-        assignments_path = Path("/.claude/config/agent-assignments.json")
+        assignments_path = Path("./.claude/config/agent-assignments.json")
         if not assignments_path.exists():
             return {"error": "Agent assignments not found"}
 

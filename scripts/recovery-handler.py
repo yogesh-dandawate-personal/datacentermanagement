@@ -41,7 +41,7 @@ class RecoveryHandler:
 
     def _setup_logging(self) -> logging.Logger:
         """Setup logging"""
-        log_dir = Path("/.claude/orchestrator/logs")
+        log_dir = Path("./.claude/orchestrator/logs")
         log_dir.mkdir(parents=True, exist_ok=True)
 
         logger = logging.getLogger("recovery-handler")
@@ -66,7 +66,7 @@ class RecoveryHandler:
     def _check_all_agents(self):
         """Check health of all agents"""
         # Load orchestrator state
-        state_path = Path("/.claude/orchestrator/state.json")
+        state_path = Path("./.claude/orchestrator/state.json")
         if not state_path.exists():
             return
 
@@ -120,7 +120,7 @@ class RecoveryHandler:
 
         try:
             # Find latest checkpoint
-            checkpoint_dir = Path(f"/.claude/agents/{agent_id}/checkpoints")
+            checkpoint_dir = Path(f"./.claude/agents/{agent_id}/checkpoints")
             if not checkpoint_dir.exists():
                 return {
                     "success": False,
@@ -299,7 +299,7 @@ class RecoveryHandler:
         }
 
         # Save alert
-        alert_dir = Path("/.claude/orchestrator/alerts")
+        alert_dir = Path("./.claude/orchestrator/alerts")
         alert_dir.mkdir(parents=True, exist_ok=True)
         alert_file = alert_dir / f"alert_{int(time.time())}.json"
         alert_file.write_text(json.dumps(alert, indent=2))
@@ -312,7 +312,7 @@ class RecoveryHandler:
 
     def save_recovery_history(self):
         """Save recovery history to file"""
-        history_dir = Path("/.claude/orchestrator/history")
+        history_dir = Path("./.claude/orchestrator/history")
         history_dir.mkdir(parents=True, exist_ok=True)
         history_file = history_dir / f"recovery_{int(time.time())}.json"
         history_file.write_text(json.dumps(self.recovery_history, indent=2))

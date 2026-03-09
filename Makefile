@@ -244,14 +244,14 @@ status:
 
 # Agent orchestration
 agent-start:
-	@python scripts/agent-orchestrator.py --daemon
+	@python3 scripts/agent-orchestrator.py --daemon
 
 agent-stop:
 	@pkill -f agent-orchestrator.py
 
 orchestrator-start:
-	@python scripts/agent-orchestrator.py --mode daemon &
-	@python scripts/progress-reporter.py --watch &
+	@python3 scripts/agent-orchestrator.py --mode daemon &
+	@python3 scripts/progress-reporter.py --watch &
 	@echo "$(GREEN)✓ Orchestrator started (detached)$(NC)"
 	@echo "  View progress: make progress-watch"
 
@@ -262,41 +262,41 @@ orchestrator-stop:
 
 # Progress reporting
 progress-report:
-	@python scripts/progress-reporter.py
+	@python3 scripts/progress-reporter.py
 
 progress-watch:
-	@python scripts/progress-reporter.py --watch
+	@python3 scripts/progress-reporter.py --watch
 
 daily-standup:
-	@python scripts/daily-standup-generator.py --date $(DATE)
+	@python3 scripts/daily-standup-generator.py --date $(DATE)
 
 standup-save:
-	@python scripts/progress-reporter.py --save-standup
+	@python3 scripts/progress-reporter.py --save-standup
 
 # Checkpoint management
 checkpoint-create:
-	@python scripts/checkpoint-manager.py create $(SESSION) $(AGENT) $(PHASE)
+	@python3 scripts/checkpoint-manager.py create $(SESSION) $(AGENT) $(PHASE)
 
 checkpoint-restore:
-	@python scripts/checkpoint-manager.py restore $(SESSION) $(AGENT) $(CHECKPOINT)
+	@python3 scripts/checkpoint-manager.py restore $(SESSION) $(AGENT) $(CHECKPOINT)
 
 checkpoint-list:
-	@python scripts/checkpoint-manager.py list $(SESSION) $(AGENT)
+	@python3 scripts/checkpoint-manager.py list $(SESSION) $(AGENT)
 
 # Agent status
 agent-status:
-	@python scripts/agent-orchestrator.py --status $(AGENT)
+	@python3 scripts/agent-orchestrator.py --status $(AGENT)
 
 agent-sessions:
 	@tmux list-sessions 2>/dev/null | grep agent- || echo "No active agent sessions"
 
 # Parallel TDD
 parallel-tdd:
-	@python scripts/parallel-tdd-orchestrator.py $(STORY)
+	@python3 scripts/parallel-tdd-orchestrator.py $(STORY)
 
 # Ralph Loop execution
 ralph-loop:
-	@python scripts/ralph-loop-executor.py $(STORY) $(AGENT)
+	@python3 scripts/ralph-loop-executor.py $(STORY) $(AGENT)
 
 # Help commands
 docs:
@@ -342,9 +342,9 @@ autonomous-stop: orchestrator-stop docker-down
 sprints-execute:
 	@echo "$(CYAN)Executing all 13 sprints in parallel mode...$(NC)"
 	@echo "$(YELLOW)No user prompts - full autonomous mode enabled$(NC)"
-	@python scripts/agent-orchestrator.py --mode daemon &
-	@python scripts/progress-reporter.py --watch &
-	@python scripts/recovery-handler.py --daemon &
+	@python3 scripts/agent-orchestrator.py --mode daemon &
+	@python3 scripts/progress-reporter.py --watch &
+	@python3 scripts/recovery-handler.py --daemon &
 	@echo "$(GREEN)✓ Parallel sprint execution started$(NC)"
 	@echo "  13 sprints will execute with auto-progression"
 	@echo "  Max 2 sprints in parallel (parallel_group 1 & 2)"
@@ -352,7 +352,7 @@ sprints-execute:
 	@echo "  View progress: make progress-watch"
 
 sprints-status:
-	@python scripts/progress-reporter.py
+	@python3 scripts/progress-reporter.py
 
 sprints-stop:
 	@pkill -f agent-orchestrator.py || true

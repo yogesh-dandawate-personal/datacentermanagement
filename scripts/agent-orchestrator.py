@@ -117,7 +117,7 @@ class Agent:
 class AgentOrchestrator:
     """Master orchestrator for all 26 agents"""
 
-    def __init__(self, config_path: str = "/.claude/config/agent-config.json"):
+    def __init__(self, config_path: str = "./.claude/config/agent-config.json"):
         self.config_path = Path(config_path)
         self.agents: Dict[str, Agent] = {}
         self.task_assignments: Dict[str, str] = {}  # story_id -> agent_id
@@ -128,7 +128,7 @@ class AgentOrchestrator:
 
     def _setup_logging(self) -> logging.Logger:
         """Setup logging for orchestrator"""
-        log_dir = Path("/.claude/orchestrator/logs")
+        log_dir = Path("./.claude/orchestrator/logs")
         log_dir.mkdir(parents=True, exist_ok=True)
 
         logger = logging.getLogger("orchestrator")
@@ -359,7 +359,7 @@ class AgentOrchestrator:
 
         return report
 
-    def save_state(self, output_path: str = "/.claude/orchestrator/state.json"):
+    def save_state(self, output_path: str = "./.claude/orchestrator/state.json"):
         """Save orchestrator state for recovery"""
         state = {
             "timestamp": datetime.now().isoformat(),

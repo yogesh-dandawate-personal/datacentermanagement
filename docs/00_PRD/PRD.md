@@ -1,4 +1,4 @@
-# iCarbon: Agentic Data Center ESG Platform - Living PRD
+# iNetZero: Agentic Data Center ESG Platform - Living PRD
 
 **Version**: 1.0.0
 **Status**: Active Development
@@ -29,7 +29,7 @@
 
 ## Executive Summary
 
-**iCarbon** is an enterprise-grade, multi-tenant Software-as-a-Service (SaaS) platform designed to help data center operators track, calculate, report, and optimize Environmental, Social, and Governance (ESG) metrics with AI-powered agents and audit-ready governance workflows.
+**iNetZero** is an enterprise-grade, multi-tenant Software-as-a-Service (SaaS) platform designed to help data center operators track, calculate, report, and optimize Environmental, Social, and Governance (ESG) metrics with AI-powered agents and audit-ready governance workflows.
 
 The platform enables organizations to:
 - 🏢 Onboard multiple tenants and manage facility hierarchies
@@ -460,7 +460,7 @@ Tenant
         └────────────────┼──────────────┘
                          │
         ┌────────────────▼──────────────┐
-        │    iCarbon ESG Platform       │
+        │    iNetZero ESG Platform       │
         │  (React + FastAPI + PG)       │
         │  ┌──────────────────────────┐ │
         │  │ Frontend (React/TS)      │ │
@@ -489,7 +489,7 @@ Tenant
 ### Container Diagram
 
 ```
-iCarbon Platform:
+iNetZero Platform:
 ┌──────────────────────────────────────────────────────┐
 │ Frontend Container                                   │
 │ ├── React App                                       │
