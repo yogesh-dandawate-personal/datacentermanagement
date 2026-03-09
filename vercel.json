@@ -16,8 +16,7 @@
     }
   ],
   "env": {
-    "PYTHONUNBUFFERED": "1",
-    "DATABASE_URL": "@DATABASE_URL"
+    "PYTHONUNBUFFERED": "1"
   },
   "headers": [
     {
