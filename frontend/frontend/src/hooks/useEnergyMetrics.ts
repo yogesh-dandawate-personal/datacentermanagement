@@ -9,7 +9,8 @@ export function useEnergyMetrics() {
     }
   }
 
-  const subscribeToUpdates = () => {
+  const subscribeToUpdates = (orgId: string, callback: (data: any) => void) => {
+    // Placeholder for real-time updates
     return () => {}
   }
 
