@@ -68,14 +68,23 @@ async def netzero_exception_handler(request: Request, exc: NetZeroException):
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
     """Handle unexpected exceptions"""
-    logger.error(f"Unexpected exception: {str(exc)}")
+    logger.error(f"Unexpected exception: {str(exc)}", exc_info=True)
+
+    # Return more helpful error messages
+    error_message = "An unexpected error occurred"
+    if "database" in str(exc).lower() or "connection" in str(exc).lower():
+        error_message = "Database connection failed. Please check DATABASE_URL environment variable."
+
     return JSONResponse(
         status_code=500,
         content={
             "error": "InternalServerError",
-            "message": "An unexpected error occurred",
+            "message": error_message,
             "status_code": 500,
-            "detail": {"error_type": exc.__class__.__name__},
+            "detail": {
+                "error_type": exc.__class__.__name__,
+                "error_msg": str(exc)[:200]  # Truncate to 200 chars for safety
+            },
         },
     )
 
