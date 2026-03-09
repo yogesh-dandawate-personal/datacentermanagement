@@ -64,13 +64,13 @@ export function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="mb-8">
+      <section className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
         <p className="text-slate-400">Monitor your datacenter's environmental impact in real-time</p>
-      </div>
+      </section>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" aria-label="Key performance indicators">
         {isLoading ? (
           <>
             <SkeletonStat />
@@ -128,7 +128,7 @@ export function Dashboard() {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8" aria-label="Energy analytics">
         {/* Energy Consumption Chart */}
         <Card className="lg:col-span-2">
           <CardHeader>
@@ -140,24 +140,50 @@ export function Dashboard() {
               {isLoading ? (
                 <SkeletonChart height={300} />
               ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={energyTrendData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                    <XAxis dataKey="hour" stroke="#64748b" />
-                    <YAxis stroke="#64748b" />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#1e293b',
-                        border: '1px solid #475569',
-                        borderRadius: '8px',
-                      }}
-                      labelStyle={{ color: '#e2e8f0' }}
-                    />
-                    <Legend />
-                    <Line type="monotone" dataKey="usage" stroke="#3b82f6" strokeWidth={2} name="Usage (kW)" />
-                    <Line type="monotone" dataKey="target" stroke="#ef4444" strokeWidth={2} strokeDasharray="5 5" name="Target (kW)" />
-                  </LineChart>
-                </ResponsiveContainer>
+                <div className="w-full h-80">
+                  <ResponsiveContainer width="100%" height={320}>
+                    <LineChart data={energyTrendData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <XAxis dataKey="hour" stroke="#64748b" style={{ fontSize: '12px' }} />
+                      <YAxis
+                        stroke="#64748b"
+                        style={{ fontSize: '12px' }}
+                        label={{ value: 'Power (kW)', angle: -90, position: 'insideLeft' }}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#0f172a',
+                          border: '1px solid #64748b',
+                          borderRadius: '8px',
+                          padding: '8px 12px',
+                        }}
+                        labelStyle={{ color: '#f1f5f9' }}
+                        formatter={(value) => `${value} kW`}
+                      />
+                      <Legend
+                        wrapperStyle={{ paddingTop: '20px', color: '#cbd5e1' }}
+                        iconType="line"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="usage"
+                        stroke="#3b82f6"
+                        strokeWidth={2}
+                        dot={false}
+                        name="Actual Usage (kW)"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="target"
+                        stroke="#ef4444"
+                        strokeWidth={2}
+                        strokeDasharray="5 5"
+                        dot={false}
+                        name="Target (kW)"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               )}
             </ErrorBoundary>
           </CardContent>
@@ -199,11 +225,12 @@ export function Dashboard() {
       </div>
 
       {/* Recent Activity */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>Latest events and alerts</CardDescription>
-        </CardHeader>
+      <section>
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+            <CardDescription>Latest events and alerts</CardDescription>
+          </CardHeader>
         <CardContent>
           {isLoading ? (
             <SkeletonTable rows={3} cols={3} />
@@ -250,6 +277,7 @@ export function Dashboard() {
           )}
         </CardContent>
       </Card>
+      </section>
     </div>
   )
 }
