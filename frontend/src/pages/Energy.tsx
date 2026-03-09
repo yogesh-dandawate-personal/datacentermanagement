@@ -185,7 +185,7 @@ export function Energy() {
               <p className="text-xs text-slate-400 mt-2">Estimated cost for today</p>
             </CardContent>
           </Card>
-        </div>
+        </section>
       )}
 
       {/* Charts Section */}

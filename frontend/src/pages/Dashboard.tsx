@@ -125,7 +125,7 @@ export function Dashboard() {
             )
           })
         )}
-      </div>
+      </section>
 
       {/* Charts Section */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8" aria-label="Energy analytics">
@@ -222,7 +222,7 @@ export function Dashboard() {
             )}
           </CardContent>
         </Card>
-      </div>
+      </section>
 
       {/* Recent Activity */}
       <section>
