@@ -8,13 +8,19 @@ import { Layout } from './components/Layout'
 import { useState, useEffect } from 'react'
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  // Dev mode: bypass authentication for development
+  const devMode = import.meta.env.DEV || localStorage.getItem('BYPASS_AUTH') === 'true'
+  const [isAuthenticated, setIsAuthenticated] = useState(devMode)
 
   useEffect(() => {
+    if (devMode) {
+      setIsAuthenticated(true)
+      return
+    }
     // Check if user is logged in (from localStorage or session)
     const token = localStorage.getItem('auth_token')
     setIsAuthenticated(!!token)
-  }, [])
+  }, [devMode])
 
   return (
     <Router>
