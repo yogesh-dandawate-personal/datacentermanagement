@@ -338,4 +338,44 @@ autonomous-start: docker-up orchestrator-start
 autonomous-stop: orchestrator-stop docker-down
 	@echo "$(GREEN)✓ Autonomous development system stopped$(NC)"
 
+# Parallel sprint execution (all 13 sprints in parallel with auto-progression)
+sprints-execute:
+	@echo "$(CYAN)Executing all 13 sprints in parallel mode...$(NC)"
+	@echo "$(YELLOW)No user prompts - full autonomous mode enabled$(NC)"
+	@python scripts/agent-orchestrator.py --mode daemon &
+	@python scripts/progress-reporter.py --watch &
+	@python scripts/recovery-handler.py --daemon &
+	@echo "$(GREEN)✓ Parallel sprint execution started$(NC)"
+	@echo "  13 sprints will execute with auto-progression"
+	@echo "  Max 2 sprints in parallel (parallel_group 1 & 2)"
+	@echo "  Zero user interaction required"
+	@echo "  View progress: make progress-watch"
+
+sprints-status:
+	@python scripts/progress-reporter.py
+
+sprints-stop:
+	@pkill -f agent-orchestrator.py || true
+	@pkill -f progress-reporter.py || true
+	@pkill -f recovery-handler.py || true
+	@echo "$(GREEN)✓ Sprint execution stopped$(NC)"
+
+# Deployment
+deploy-staging:
+	@echo "$(CYAN)Deploying to Vercel Staging...$(NC)"
+	@bash scripts/deploy-vercel.sh staging
+	@echo "$(GREEN)✓ Staging deployment complete$(NC)"
+	@echo "  URL: https://staging-inetze ro.vercel.app"
+
+deploy-production:
+	@echo "$(CYAN)Deploying to Vercel Production...$(NC)"
+	@bash scripts/deploy-vercel.sh production
+	@echo "$(GREEN)✓ Production deployment complete$(NC)"
+	@echo "  URL: https://app.inetze ro.io"
+
+deploy-force-production:
+	@echo "$(RED)⚠ FORCING PRODUCTION DEPLOYMENT$(NC)"
+	@bash scripts/deploy-vercel.sh production true
+	@echo "$(GREEN)✓ Production deployment complete$(NC)"
+
 .DEFAULT_GOAL := help
