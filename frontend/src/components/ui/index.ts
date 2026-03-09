@@ -42,8 +42,12 @@ export type { AlertProps } from './Alert'
 export { Spinner } from './Spinner'
 export type { SpinnerProps } from './Spinner'
 
-export { Skeleton, SkeletonList, SkeletonCard } from './Skeleton'
+export { Skeleton, SkeletonList, SkeletonCard, SkeletonStat, SkeletonChart, SkeletonTable } from './Skeleton'
 export type { SkeletonProps } from './Skeleton'
+
+export { EmptyState } from './EmptyState'
+
+export { ErrorBoundary } from './ErrorBoundary'
 
 // Modal Components
 export { Dialog } from './Dialog'

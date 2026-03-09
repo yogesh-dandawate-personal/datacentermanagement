@@ -1,6 +1,7 @@
 import { ArrowUpRight, ArrowDownRight, Zap, Leaf, TrendingUp, Activity } from 'lucide-react'
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, SkeletonStat, SkeletonChart, SkeletonTable, ErrorBoundary } from '../components/ui'
+import { useState, useEffect } from 'react'
 
 const energyTrendData = [
   { hour: '00:00', usage: 450, target: 400 },
@@ -12,16 +13,15 @@ const energyTrendData = [
   { hour: '24:00', usage: 480, target: 400 },
 ]
 
-const carbonTrendData = [
-  { month: 'Jan', emissions: 4500, target: 4200 },
-  { month: 'Feb', emissions: 4300, target: 4200 },
-  { month: 'Mar', emissions: 4100, target: 4200 },
-  { month: 'Apr', emissions: 3900, target: 4200 },
-  { month: 'May', emissions: 3800, target: 4200 },
-  { month: 'Jun', emissions: 3700, target: 4200 },
-]
-
 export function Dashboard() {
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Simulate data loading
+    const timer = setTimeout(() => setIsLoading(false), 2000)
+    return () => clearTimeout(timer)
+  }, [])
+
   const stats = [
     {
       title: 'Total Energy Usage',
@@ -71,51 +71,60 @@ export function Dashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, i) => {
-          const Icon = stat.icon
-          const isPositive = stat.trend === 'up'
-          return (
-            <Card key={i} className="group hover:border-primary-500/50">
-              <CardContent>
-              {/* Header with Icon */}
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="text-slate-300 text-sm font-medium">{stat.title}</h3>
+        {isLoading ? (
+          <>
+            <SkeletonStat />
+            <SkeletonStat />
+            <SkeletonStat />
+            <SkeletonStat />
+          </>
+        ) : (
+          stats.map((stat, i) => {
+            const Icon = stat.icon
+            const isPositive = stat.trend === 'up'
+            return (
+              <Card key={i} className="group hover:border-primary-500/50">
+                <CardContent>
+                {/* Header with Icon */}
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-slate-300 text-sm font-medium">{stat.title}</h3>
+                  <div
+                    className={`p-3 bg-gradient-to-br ${stat.color} rounded-lg opacity-80 group-hover:opacity-100 transition`}
+                  >
+                    <Icon className="w-5 h-5 text-white" />
+                  </div>
+                </div>
+
+                {/* Main Value */}
+                <div className="mb-4">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-bold text-white">{stat.value}</span>
+                    <span className="text-sm text-slate-400">{stat.unit}</span>
+                  </div>
+                </div>
+
+                {/* Change Indicator */}
                 <div
-                  className={`p-3 bg-gradient-to-br ${stat.color} rounded-lg opacity-80 group-hover:opacity-100 transition`}
-                >
-                  <Icon className="w-5 h-5 text-white" />
-                </div>
-              </div>
-
-              {/* Main Value */}
-              <div className="mb-4">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-white">{stat.value}</span>
-                  <span className="text-sm text-slate-400">{stat.unit}</span>
-                </div>
-              </div>
-
-              {/* Change Indicator */}
-              <div
-                className={`flex items-center gap-1 text-sm font-medium ${
-                  isPositive && stat.change.includes('+') && stat.title.includes('Carbon')
-                    ? 'text-green-400'
-                    : isPositive && !stat.change.includes('-')
+                  className={`flex items-center gap-1 text-sm font-medium ${
+                    isPositive && stat.change.includes('+') && stat.title.includes('Carbon')
                       ? 'text-green-400'
-                      : 'text-red-400'
-                }`}
-              >
-                {isPositive ? (
-                  <ArrowUpRight className="w-4 h-4" />
-                ) : (
-                  <ArrowDownRight className="w-4 h-4" />
-                )}
-                {stat.change} from last month
-              </div>
-              </CardContent>
-            </Card>
-          )
-        })}
+                      : isPositive && !stat.change.includes('-')
+                        ? 'text-green-400'
+                        : 'text-red-400'
+                  }`}
+                >
+                  {isPositive ? (
+                    <ArrowUpRight className="w-4 h-4" />
+                  ) : (
+                    <ArrowDownRight className="w-4 h-4" />
+                  )}
+                  {stat.change} from last month
+                </div>
+                </CardContent>
+              </Card>
+            )
+          })
+        )}
       </div>
 
       {/* Charts Section */}
@@ -127,24 +136,30 @@ export function Dashboard() {
             <CardDescription>Real-time energy usage vs target</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={energyTrendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="hour" stroke="#64748b" />
-                <YAxis stroke="#64748b" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#1e293b',
-                    border: '1px solid #475569',
-                    borderRadius: '8px',
-                  }}
-                  labelStyle={{ color: '#e2e8f0' }}
-                />
-                <Legend />
-                <Line type="monotone" dataKey="usage" stroke="#3b82f6" strokeWidth={2} name="Usage (kW)" />
-                <Line type="monotone" dataKey="target" stroke="#ef4444" strokeWidth={2} strokeDasharray="5 5" name="Target (kW)" />
-              </LineChart>
-            </ResponsiveContainer>
+            <ErrorBoundary>
+              {isLoading ? (
+                <SkeletonChart height={300} />
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={energyTrendData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                    <XAxis dataKey="hour" stroke="#64748b" />
+                    <YAxis stroke="#64748b" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#1e293b',
+                        border: '1px solid #475569',
+                        borderRadius: '8px',
+                      }}
+                      labelStyle={{ color: '#e2e8f0' }}
+                    />
+                    <Legend />
+                    <Line type="monotone" dataKey="usage" stroke="#3b82f6" strokeWidth={2} name="Usage (kW)" />
+                    <Line type="monotone" dataKey="target" stroke="#ef4444" strokeWidth={2} strokeDasharray="5 5" name="Target (kW)" />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </ErrorBoundary>
           </CardContent>
         </Card>
 
@@ -155,26 +170,30 @@ export function Dashboard() {
             <CardDescription>Current energy usage</CardDescription>
           </CardHeader>
           <CardContent>
-          <div className="space-y-3">
-            {[
-              { name: 'DC East 1', usage: '456 kWh', percentage: 85 },
-              { name: 'DC West 1', usage: '345 kWh', percentage: 72 },
-              { name: 'DC Central', usage: '234 kWh', percentage: 58 },
-            ].map((facility, i) => (
-              <div key={i} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-white">{facility.name}</span>
-                  <span className="text-xs text-slate-400">{facility.usage}</span>
-                </div>
-                <div className="w-full h-2 bg-slate-900/50 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"
-                    style={{ width: `${facility.percentage}%` }}
-                  ></div>
-                </div>
+            {isLoading ? (
+              <SkeletonTable rows={3} cols={2} />
+            ) : (
+              <div className="space-y-3">
+                {[
+                  { name: 'DC East 1', usage: '456 kWh', percentage: 85 },
+                  { name: 'DC West 1', usage: '345 kWh', percentage: 72 },
+                  { name: 'DC Central', usage: '234 kWh', percentage: 58 },
+                ].map((facility, i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-white">{facility.name}</span>
+                      <span className="text-xs text-slate-400">{facility.usage}</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-900/50 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"
+                        style={{ width: `${facility.percentage}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -186,45 +205,49 @@ export function Dashboard() {
           <CardDescription>Latest events and alerts</CardDescription>
         </CardHeader>
         <CardContent>
-        <div className="space-y-4">
-          {[
-            {
-              action: 'Carbon emissions exceeded target',
-              facility: 'DC East 1',
-              time: '2 hours ago',
-              severity: 'warning',
-            },
-            {
-              action: 'Energy efficiency improved',
-              facility: 'DC Central',
-              time: '5 hours ago',
-              severity: 'success',
-            },
-            {
-              action: 'Monthly report generated',
-              facility: 'All Facilities',
-              time: '1 day ago',
-              severity: 'info',
-            },
-          ].map((activity, i) => (
-            <div key={i} className="flex items-center gap-4 p-4 bg-slate-900/30 rounded-lg border border-slate-700/30">
-              <div
-                className={`w-2 h-2 rounded-full ${
-                  activity.severity === 'warning'
-                    ? 'bg-yellow-500'
-                    : activity.severity === 'success'
-                      ? 'bg-green-500'
-                      : 'bg-blue-500'
-                }`}
-              ></div>
-              <div className="flex-1">
-                <p className="text-white text-sm font-medium">{activity.action}</p>
-                <p className="text-slate-400 text-xs">{activity.facility}</p>
-              </div>
-              <span className="text-slate-500 text-xs">{activity.time}</span>
+          {isLoading ? (
+            <SkeletonTable rows={3} cols={3} />
+          ) : (
+            <div className="space-y-4">
+              {[
+                {
+                  action: 'Carbon emissions exceeded target',
+                  facility: 'DC East 1',
+                  time: '2 hours ago',
+                  severity: 'warning',
+                },
+                {
+                  action: 'Energy efficiency improved',
+                  facility: 'DC Central',
+                  time: '5 hours ago',
+                  severity: 'success',
+                },
+                {
+                  action: 'Monthly report generated',
+                  facility: 'All Facilities',
+                  time: '1 day ago',
+                  severity: 'info',
+                },
+              ].map((activity, i) => (
+                <div key={i} className="flex items-center gap-4 p-4 bg-slate-900/30 rounded-lg border border-slate-700/30">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      activity.severity === 'warning'
+                        ? 'bg-yellow-500'
+                        : activity.severity === 'success'
+                          ? 'bg-green-500'
+                          : 'bg-blue-500'
+                    }`}
+                  ></div>
+                  <div className="flex-1">
+                    <p className="text-white text-sm font-medium">{activity.action}</p>
+                    <p className="text-slate-400 text-xs">{activity.facility}</p>
+                  </div>
+                  <span className="text-slate-500 text-xs">{activity.time}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          )}
         </CardContent>
       </Card>
     </div>

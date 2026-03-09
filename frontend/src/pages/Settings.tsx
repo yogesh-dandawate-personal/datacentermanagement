@@ -1,15 +1,28 @@
-import { Bell, Lock, Key, Zap, Users, CreditCard, LogOut, Save } from 'lucide-react'
+import { Bell, Lock, Key, Zap, Users, CreditCard, LogOut, Save, CheckCircle } from 'lucide-react'
 import { useState } from 'react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Button, Input, Toggle, Badge } from '../components/ui'
 
 export function Settings() {
   const [activeTab, setActiveTab] = useState('profile')
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
   const [formData, setFormData] = useState({
     fullName: 'John Doe',
     email: 'john@company.com',
     company: 'iNetZero Corp',
     timezone: 'UTC-8',
   })
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    setSaveSuccess(false)
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+    setIsSaving(false)
+    setSaveSuccess(true)
+    // Hide success message after 3 seconds
+    setTimeout(() => setSaveSuccess(false), 3000)
+  }
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: Users },
@@ -55,6 +68,14 @@ export function Settings() {
       {/* Profile Tab */}
       {activeTab === 'profile' && (
         <div className="grid gap-6">
+          {saveSuccess && (
+            <div className="p-4 bg-success-600/20 border border-success-600/50 rounded-lg flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-success-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-success-400 font-medium text-sm">Changes saved successfully!</p>
+              </div>
+            </div>
+          )}
           <Card>
             <CardHeader>
               <CardTitle>Personal Information</CardTitle>
@@ -66,6 +87,7 @@ export function Settings() {
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 placeholder="John Doe"
+                disabled={isSaving}
               />
               <Input
                 label="Email Address"
@@ -73,24 +95,40 @@ export function Settings() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="john@company.com"
+                disabled={isSaving}
               />
               <Input
                 label="Company"
                 value={formData.company}
                 onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                 placeholder="iNetZero Corp"
+                disabled={isSaving}
               />
               <Input
                 label="Timezone"
                 value={formData.timezone}
                 onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
+                disabled={isSaving}
               />
             </CardContent>
             <CardFooter>
-              <Button variant="outline">Cancel</Button>
-              <Button variant="primary">
-                <Save className="w-4 h-4 mr-2" />
-                Save Changes
+              <Button variant="outline" disabled={isSaving}>Cancel</Button>
+              <Button
+                variant="primary"
+                onClick={handleSave}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </>
+                )}
               </Button>
             </CardFooter>
           </Card>
@@ -100,20 +138,44 @@ export function Settings() {
       {/* Organization Tab */}
       {activeTab === 'organization' && (
         <div className="grid gap-6">
+          {saveSuccess && (
+            <div className="p-4 bg-success-600/20 border border-success-600/50 rounded-lg flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-success-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-success-400 font-medium text-sm">Changes saved successfully!</p>
+              </div>
+            </div>
+          )}
           <Card>
             <CardHeader>
               <CardTitle>Organization Settings</CardTitle>
               <CardDescription>Manage your organization</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Input label="Organization Name" placeholder="iNetZero Corp" />
+              <Input label="Organization Name" placeholder="iNetZero Corp" disabled={isSaving} />
               <Input label="Organization ID" placeholder="org_12345" disabled />
-              <Input label="Support Email" placeholder="support@company.com" />
-              <Input label="Industry" placeholder="Data Center Operations" />
+              <Input label="Support Email" placeholder="support@company.com" disabled={isSaving} />
+              <Input label="Industry" placeholder="Data Center Operations" disabled={isSaving} />
             </CardContent>
             <CardFooter>
-              <Button variant="outline">Cancel</Button>
-              <Button variant="primary">Save Changes</Button>
+              <Button variant="outline" disabled={isSaving}>Cancel</Button>
+              <Button
+                variant="primary"
+                onClick={handleSave}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
             </CardFooter>
           </Card>
 

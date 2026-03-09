@@ -22,9 +22,9 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950">
-      {/* Left Sidebar */}
+      {/* Left Sidebar - Hidden on mobile, visible on md+ */}
       <aside
-        className={`fixed left-0 top-0 h-screen bg-gradient-to-b from-slate-900 to-slate-950 border-r border-slate-800/50 backdrop-blur-xl transition-all duration-300 z-40 ${
+        className={`fixed hidden md:fixed left-0 top-0 h-screen bg-gradient-to-b from-slate-900 to-slate-950 border-r border-slate-800/50 backdrop-blur-xl transition-all duration-300 z-40 ${
           sidebarOpen ? 'w-64' : 'w-20'
         }`}
       >
@@ -80,45 +80,56 @@ export function Layout({ children }: LayoutProps) {
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className={`transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'}`}>
+      {/* Main Content - Full width on mobile, margin on md+ */}
+      <div className={`transition-all duration-300 ml-0 md:${sidebarOpen ? 'ml-64' : 'ml-20'}`}>
         {/* Top Header */}
-        <header className="h-20 bg-gradient-to-r from-slate-900/80 to-slate-900/80 backdrop-blur-xl border-b border-slate-800/50 flex items-center justify-between px-6 sticky top-0 z-30">
+        <header className="h-20 bg-gradient-to-r from-slate-900/80 to-slate-900/80 backdrop-blur-xl border-b border-slate-800/50 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
+          {/* Mobile Menu Button - Show only on mobile */}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="md:hidden p-2 hover:bg-slate-800 rounded-lg transition"
+            aria-label="Toggle sidebar menu"
+          >
+            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+
           <div className="flex items-center gap-4 flex-1">
-            <div className="flex-1 max-w-md">
-              <div className="relative">
+            {/* Search bar - Hidden on mobile to save space */}
+            <div className="hidden sm:flex flex-1 max-w-md">
+              <div className="relative w-full">
                 <Search className="absolute left-3 top-3 w-5 h-5 text-slate-500" />
                 <input
                   type="text"
                   placeholder="Search..."
                   className="w-full pl-10 pr-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-white placeholder-slate-500 focus:border-blue-500/50 focus:outline-none transition"
+                  aria-label="Search"
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* Notifications */}
-            <button className="relative p-2 hover:bg-slate-800 rounded-lg transition">
+            <button className="relative p-2 hover:bg-slate-800 rounded-lg transition" aria-label="Notifications">
               <Bell className="w-5 h-5 text-slate-400 hover:text-white transition" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
 
-            {/* User Menu */}
-            <div className="flex items-center gap-3 pl-4 border-l border-slate-700/50">
-              <div className="text-right">
+            {/* User Menu - Hidden text on mobile, show avatar only */}
+            <div className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-4 border-l border-slate-700/50">
+              <div className="hidden sm:block text-right">
                 <p className="text-sm font-medium text-white">John Doe</p>
                 <p className="text-xs text-slate-400">Admin</p>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white font-bold text-sm">
                 JD
               </div>
             </div>
           </div>
         </header>
 
-        {/* Page Content */}
-        <main className="p-6 min-h-[calc(100vh-80px)]">
+        {/* Page Content - Responsive padding */}
+        <main className="p-4 sm:p-6 min-h-[calc(100vh-80px)]">
           <div className="max-w-7xl mx-auto">{children}</div>
         </main>
 
