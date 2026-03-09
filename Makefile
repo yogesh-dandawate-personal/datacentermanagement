@@ -378,7 +378,7 @@ deploy-staging:
 	@echo "$(CYAN)Deploying to Vercel Staging...$(NC)"
 	@bash scripts/deploy-vercel.sh staging
 	@echo "$(GREEN)✓ Staging deployment complete$(NC)"
-	@echo "  URL: https://netzero.vercel.app"
+	@echo "  URL: https://inetzero-staging.vercel.app"
 
 deploy-production:
 	@echo "$(CYAN)Deploying to Vercel Production...$(NC)"

@@ -281,7 +281,7 @@ Result: Frontend demo ready day 5, backend by day 10
 ```bash
 # Automatically triggered when sprint completes
 # Every sprint deploys to staging
-# URL: https://netzero.vercel.app
+# URL: https://inetzero-staging.vercel.app
 # Vercel auto-preview each deployment
 ```
 

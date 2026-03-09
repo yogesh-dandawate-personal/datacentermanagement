@@ -224,10 +224,10 @@
     "project_name": "netzero",
     "environments": {
       "staging": {
-        "url": "netzero.vercel.app",
+        "url": "inetzero-staging.vercel.app",
         "auto_deploy": true,
         "preview_deployments": true,
-        "API_URL": "https://api.netzero.vercel.app"
+        "API_URL": "https://api-inetzero-staging.vercel.app"
       },
       "production": {
         "url": "app.netzero.io",
