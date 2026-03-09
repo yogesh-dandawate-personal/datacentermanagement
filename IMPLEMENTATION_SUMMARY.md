@@ -506,4 +506,6 @@ For questions about:
 ---
 
 *Autonomous Agent-Driven Development System for iNetZero*
+*Personal Project by Yogesh Dandawate*
+*GitHub: yogesh-dandawate-personal/datacentermanagement*
 *Built by Claude - March 2026*

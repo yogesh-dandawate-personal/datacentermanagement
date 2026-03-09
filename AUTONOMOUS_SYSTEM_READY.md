@@ -544,4 +544,7 @@ All with **zero human intervention** in 26 weeks.
 
 ---
 
-*iNetZero ESG Carbon Credit System - Powered by Autonomous Agent-Driven Development*
+*iNetZero ESG Carbon Credit System - Personal Project*
+*Built by: Yogesh Dandawate*
+*GitHub: yogesh-dandawate-personal/datacentermanagement*
+*Powered by: Autonomous Agent-Driven Development*

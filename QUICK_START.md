@@ -179,5 +179,7 @@ make sprints-execute
 
 ---
 
+**Personal Project Owner**: Yogesh Dandawate
+**Repository**: yogesh-dandawate-personal/datacentermanagement
 **Last Updated**: 2026-03-09
 **System Status**: ✅ FULLY OPERATIONAL
