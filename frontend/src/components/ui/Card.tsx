@@ -1,6 +1,8 @@
 import { HTMLAttributes } from 'react'
 
-interface CardProps extends HTMLAttributes<HTMLDivElement> {}
+export interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  variant?: 'default' | 'glass' | 'elevated'
+}
 
 export function Card({ className = '', ...props }: CardProps) {
   return (

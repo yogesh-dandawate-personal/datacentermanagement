@@ -1,4 +1,25 @@
 import { ArrowUpRight, ArrowDownRight, Zap, Leaf, TrendingUp, Activity } from 'lucide-react'
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui'
+
+const energyTrendData = [
+  { hour: '00:00', usage: 450, target: 400 },
+  { hour: '04:00', usage: 380, target: 400 },
+  { hour: '08:00', usage: 520, target: 400 },
+  { hour: '12:00', usage: 680, target: 400 },
+  { hour: '16:00', usage: 750, target: 400 },
+  { hour: '20:00', usage: 620, target: 400 },
+  { hour: '24:00', usage: 480, target: 400 },
+]
+
+const carbonTrendData = [
+  { month: 'Jan', emissions: 4500, target: 4200 },
+  { month: 'Feb', emissions: 4300, target: 4200 },
+  { month: 'Mar', emissions: 4100, target: 4200 },
+  { month: 'Apr', emissions: 3900, target: 4200 },
+  { month: 'May', emissions: 3800, target: 4200 },
+  { month: 'Jun', emissions: 3700, target: 4200 },
+]
 
 export function Dashboard() {
   const stats = [
@@ -54,10 +75,8 @@ export function Dashboard() {
           const Icon = stat.icon
           const isPositive = stat.trend === 'up'
           return (
-            <div
-              key={i}
-              className="group p-6 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl hover:border-blue-500/50 transition"
-            >
+            <Card key={i} className="group hover:border-primary-500/50">
+              <CardContent>
               {/* Header with Icon */}
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-slate-300 text-sm font-medium">{stat.title}</h3>
@@ -93,7 +112,8 @@ export function Dashboard() {
                 )}
                 {stat.change} from last month
               </div>
-            </div>
+              </CardContent>
+            </Card>
           )
         })}
       </div>
@@ -101,19 +121,40 @@ export function Dashboard() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
         {/* Energy Consumption Chart */}
-        <div className="lg:col-span-2 p-6 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl">
-          <h3 className="text-lg font-bold text-white mb-6">Energy Consumption Trend</h3>
-          <div className="h-64 bg-slate-900/30 rounded-lg flex items-center justify-center border border-slate-700/30">
-            <div className="text-center">
-              <TrendingUp className="w-12 h-12 text-slate-600 mx-auto mb-2" />
-              <p className="text-slate-500">Loading chart...</p>
-            </div>
-          </div>
-        </div>
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Energy Consumption Trend (24h)</CardTitle>
+            <CardDescription>Real-time energy usage vs target</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={energyTrendData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <XAxis dataKey="hour" stroke="#64748b" />
+                <YAxis stroke="#64748b" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#1e293b',
+                    border: '1px solid #475569',
+                    borderRadius: '8px',
+                  }}
+                  labelStyle={{ color: '#e2e8f0' }}
+                />
+                <Legend />
+                <Line type="monotone" dataKey="usage" stroke="#3b82f6" strokeWidth={2} name="Usage (kW)" />
+                <Line type="monotone" dataKey="target" stroke="#ef4444" strokeWidth={2} strokeDasharray="5 5" name="Target (kW)" />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
         {/* Top Facilities */}
-        <div className="p-6 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl">
-          <h3 className="text-lg font-bold text-white mb-6">Top Facilities</h3>
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Facilities</CardTitle>
+            <CardDescription>Current energy usage</CardDescription>
+          </CardHeader>
+          <CardContent>
           <div className="space-y-3">
             {[
               { name: 'DC East 1', usage: '456 kWh', percentage: 85 },
@@ -134,12 +175,17 @@ export function Dashboard() {
               </div>
             ))}
           </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Recent Activity */}
-      <div className="p-6 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl">
-        <h3 className="text-lg font-bold text-white mb-6">Recent Activity</h3>
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Activity</CardTitle>
+          <CardDescription>Latest events and alerts</CardDescription>
+        </CardHeader>
+        <CardContent>
         <div className="space-y-4">
           {[
             {
@@ -179,7 +225,8 @@ export function Dashboard() {
             </div>
           ))}
         </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

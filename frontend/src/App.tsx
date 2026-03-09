@@ -3,6 +3,7 @@ import { Landing } from './pages/Landing'
 import { Dashboard } from './pages/Dashboard'
 import { Energy } from './pages/Energy'
 import { Reports } from './pages/Reports'
+import { Settings } from './pages/Settings'
 import { Layout } from './components/Layout'
 import { useState, useEffect } from 'react'
 
@@ -52,12 +53,7 @@ function App() {
               path="/settings"
               element={
                 <Layout>
-                  <div className="space-y-6">
-                    <h1 className="text-3xl font-bold text-white">Settings</h1>
-                    <div className="p-8 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl text-center">
-                      <p className="text-slate-300">Settings coming soon</p>
-                    </div>
-                  </div>
+                  <Settings />
                 </Layout>
               }
             />
