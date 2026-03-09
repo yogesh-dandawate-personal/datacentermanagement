@@ -1,21 +1,26 @@
 {
   "version": 2,
-  "projectSettings": {
-    "projectName": "netzero",
-    "framework": "nextjs"
-  },
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "env": {
-    "NODE_ENV": {
-      "value": "production"
-    }
-  },
-  "regions": ["sfo1"],
+  "name": "netzero",
   "public": false,
+  "regions": ["sfo1"],
+  "builds": [
+    {
+      "src": "backend/app/main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "backend/app/main.py"
+    }
+  ],
+  "env": {
+    "PYTHONUNBUFFERED": "1"
+  },
   "headers": [
     {
-      "source": "/api/:path*",
+      "source": "/api/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -28,21 +33,12 @@
         {
           "key": "Access-Control-Allow-Methods",
           "value": "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
         }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "http://localhost:3000/api/:path*"
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/docs",
-      "destination": "/api/docs",
-      "permanent": false
     }
   ]
 }
