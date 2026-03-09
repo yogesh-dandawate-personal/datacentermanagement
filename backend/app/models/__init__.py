@@ -1044,3 +1044,100 @@ class ReportingBenchmark(Base):
 
     # Relationships
     tenant = relationship("Tenant")
+
+
+# ============================================================================
+# SPRINT 10: WORKFLOW & APPROVAL SYSTEM MODELS
+# ============================================================================
+
+class WorkflowState(Base):
+    """Workflow state tracking for approval entities"""
+    __tablename__ = "workflow_states"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    entity_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    entity_type = Column(String(100), nullable=False, index=True)  # report, credit_batch, target, etc.
+
+    current_state = Column(String(50), nullable=False, index=True)  # draft, review, approved, archived
+    previous_state = Column(String(50))
+
+    changed_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    change_reason = Column(Text)
+
+    state_changed_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    # Relationships
+    changed_by_user = relationship("User", foreign_keys=[changed_by])
+
+
+class Approval(Base):
+    """Individual approval step in workflow"""
+    __tablename__ = "approvals"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    entity_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    entity_type = Column(String(100), nullable=False, index=True)
+
+    approval_stage = Column(String(50), nullable=False)  # maker, checker, reviewer
+    required_role = Column(String(100), nullable=False)  # admin, reviewer, approver, etc.
+
+    status = Column(String(50), default="pending", index=True)  # pending, approved, rejected, commented
+    assigned_to = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+
+    due_date = Column(DateTime, nullable=True, index=True)
+    completed_date = Column(DateTime, nullable=True)
+    completed_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+
+    decision = Column(String(50))  # approve, reject, request_changes
+    comment_summary = Column(Text)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    assigned_user = relationship("User", foreign_keys=[assigned_to], backref="approvals_assigned")
+    completed_by_user = relationship("User", foreign_keys=[completed_by], backref="approvals_completed")
+    comments = relationship("ApprovalComment", back_populates="approval", cascade="all, delete-orphan")
+
+
+class ApprovalComment(Base):
+    """Comments on approvals for discussion threads"""
+    __tablename__ = "approval_comments"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    approval_id = Column(UUID(as_uuid=True), ForeignKey("approvals.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    comment_text = Column(Text, nullable=False)
+    comment_type = Column(String(50), default="comment")  # comment, request_changes, approve, reject
+
+    commented_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    approval = relationship("Approval", back_populates="comments")
+    commented_by_user = relationship("User", foreign_keys=[commented_by])
+
+
+class WorkflowConfig(Base):
+    """Workflow configuration templates"""
+    __tablename__ = "workflow_configs"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    config_name = Column(String(255), nullable=False)  # for_reports, for_credits, for_targets
+    entity_type = Column(String(100), nullable=False)  # report, credit_batch, target
+
+    stages = Column(JSON, default=list)  # [{stage: "maker", role: "editor", required: true}, ...]
+    auto_escalate_days = Column(Integer, default=7)
+    require_all_approvals = Column(Boolean, default=True)
+
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    tenant = relationship("Tenant")
