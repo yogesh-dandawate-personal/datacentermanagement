@@ -1141,3 +1141,105 @@ class WorkflowConfig(Base):
 
     # Relationships
     tenant = relationship("Tenant")
+
+
+# ============================================================================
+# SPRINT 11: REPORTING ENGINE MODELS
+# ============================================================================
+
+class Report(Base):
+    """ESG Reports with versioning and exports"""
+    __tablename__ = "reports"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    report_type = Column(String(50), nullable=False, index=True)  # esg_monthly, emissions_summary, kpi_summary
+    report_period_start = Column(DateTime, nullable=False, index=True)
+    report_period_end = Column(DateTime, nullable=False)
+
+    current_state = Column(String(50), default="draft", index=True)  # draft, approved, published, archived
+
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    updated_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    published_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    published_at = Column(DateTime, nullable=True)
+
+    # Relationships
+    organization = relationship("Organization")
+    tenant_obj = relationship("Tenant")
+    creator_user = relationship("User", foreign_keys=[created_by])
+    updater_user = relationship("User", foreign_keys=[updated_by])
+    publisher_user = relationship("User", foreign_keys=[published_by])
+    versions = relationship("ReportVersion", back_populates="report", cascade="all, delete-orphan")
+
+
+class ReportVersion(Base):
+    """Versioned snapshots of reports"""
+    __tablename__ = "report_versions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    report_id = Column(UUID(as_uuid=True), ForeignKey("reports.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    version_number = Column(Integer, nullable=False)
+    s3_key_pdf = Column(String(500))
+    s3_key_json = Column(String(500))
+
+    version_state = Column(String(50))  # draft, approved, published
+    version_date = Column(DateTime, nullable=False, default=datetime.utcnow)
+    versioned_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+
+    version_reason = Column(Text)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+
+    # Relationships
+    report = relationship("Report", back_populates="versions")
+    versioned_by_user = relationship("User", foreign_keys=[versioned_by])
+
+
+class ReportSignature(Base):
+    """Approval signatures on reports"""
+    __tablename__ = "report_signatures"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    report_id = Column(UUID(as_uuid=True), ForeignKey("reports.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    signer_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    signer_role = Column(String(100))  # preparer, reviewer, approver
+
+    signed_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    signature_method = Column(String(50))  # digital, manual, auto
+    signature_notes = Column(Text)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    # Relationships
+    report = relationship("Report")
+    signer_user = relationship("User", foreign_keys=[signer_id])
+
+
+class ReportTemplate(Base):
+    """Customizable report templates"""
+    __tablename__ = "report_templates"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    template_name = Column(String(255), nullable=False)
+    report_type = Column(String(50), nullable=False)  # esg_monthly, emissions_summary, kpi_summary
+
+    template_config = Column(JSON, default=dict)  # {sections: [], formats: [], etc.}
+    is_default = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
+
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    tenant_obj = relationship("Tenant")
+    creator_user = relationship("User", foreign_keys=[created_by])
