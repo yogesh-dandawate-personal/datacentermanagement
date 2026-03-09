@@ -5,73 +5,64 @@ import { Energy } from './pages/Energy'
 import { Reports } from './pages/Reports'
 import { Settings } from './pages/Settings'
 import { Layout } from './components/Layout'
-import { useState, useEffect } from 'react'
+import { AuthProvider } from './context/AuthContext'
+import { ProtectedRoute } from './components/ProtectedRoute'
 
 function App() {
-  // Dev mode: bypass authentication for development
-  const devMode = import.meta.env.DEV || localStorage.getItem('BYPASS_AUTH') === 'true'
-  const [isAuthenticated, setIsAuthenticated] = useState(devMode)
-
-  useEffect(() => {
-    if (devMode) {
-      setIsAuthenticated(true)
-      return
-    }
-    // Check if user is logged in (from localStorage or session)
-    const token = localStorage.getItem('auth_token')
-    setIsAuthenticated(!!token)
-  }, [devMode])
-
   return (
-    <Router>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Landing />} />
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Landing />} />
 
-        {/* Protected Routes */}
-        {isAuthenticated ? (
-          <>
-            <Route
-              path="/dashboard"
-              element={
+          {/* Protected Routes */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
                 <Layout>
                   <Dashboard />
                 </Layout>
-              }
-            />
-            <Route
-              path="/energy"
-              element={
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/energy"
+            element={
+              <ProtectedRoute>
                 <Layout>
                   <Energy />
                 </Layout>
-              }
-            />
-            <Route
-              path="/reports"
-              element={
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute>
                 <Layout>
                   <Reports />
                 </Layout>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
                 <Layout>
                   <Settings />
                 </Layout>
-              }
-            />
-          </>
-        ) : (
-          <Route path="/dashboard" element={<Navigate to="/" replace />} />
-        )}
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   )
 }
 

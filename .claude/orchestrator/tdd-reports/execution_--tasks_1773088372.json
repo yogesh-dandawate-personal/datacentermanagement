@@ -1,0 +1,40 @@
+{
+  "story_id": "--tasks",
+  "execution_id": "--tasks_1773088372",
+  "total_duration_seconds": 15.340095,
+  "pipelines": {
+    "development": {
+      "name": "development",
+      "status": "PASSED",
+      "duration_seconds": 0.010989,
+      "result": "success",
+      "error": null,
+      "log_count": 0
+    },
+    "testing": {
+      "name": "testing",
+      "status": "PASSED",
+      "duration_seconds": 0.345418,
+      "result": "success",
+      "error": null,
+      "log_count": 0
+    },
+    "deployment": {
+      "name": "deployment",
+      "status": "PASSED",
+      "duration_seconds": 15.339392,
+      "result": "success",
+      "error": null,
+      "log_count": 0
+    },
+    "validation": {
+      "name": "validation",
+      "status": "PASSED",
+      "duration_seconds": 0.014698,
+      "result": "success",
+      "error": null,
+      "log_count": 0
+    }
+  },
+  "all_passed": true
+}

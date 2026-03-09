@@ -1,7 +1,8 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, Table, Pagination, Select } from '../components/ui'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, Table, Pagination, Select, Spinner, Alert } from '../components/ui'
 import { FileText, Download, Eye, Trash2, Filter, Search } from 'lucide-react'
 import { useState } from 'react'
+import { useReports, useComplianceMetrics } from '../hooks/useApi'
 
 const complianceData = [
   { month: 'Jan', scope1: 450, scope2: 380, scope3: 520 },
@@ -83,24 +84,47 @@ export function Reports() {
   const [filterType, setFilterType] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
 
+  // Fetch data from API
+  const reportsData = useReports(searchTerm, filterType !== 'all' ? filterType : undefined, filterStatus !== 'all' ? filterStatus : undefined, currentPage, 5)
+  const complianceData = useComplianceMetrics()
+
   const itemsPerPage = 5
 
-  // Filter reports
-  let filteredReports = allReports.filter(report => {
-    const matchesSearch = report.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesType = filterType === 'all' || report.type === filterType
-    const matchesStatus = filterStatus === 'all' || report.status === filterStatus
-    return matchesSearch && matchesType && matchesStatus
-  })
-
-  const totalPages = Math.ceil(filteredReports.length / itemsPerPage)
-  const paginatedReports = filteredReports.slice(
+  // Use API data or fallback
+  const reports = reportsData.data?.reports || allReports
+  const totalPages = reportsData.data?.pages || Math.ceil(allReports.length / itemsPerPage)
+  const paginatedReports = reports.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   )
 
+  const isLoading = reportsData.loading || complianceData.loading
+  const hasError = reportsData.error || complianceData.error
+
   return (
     <div className="space-y-6">
+      {/* Error Alert */}
+      {hasError && (
+        <Alert
+          variant="error"
+          title="Data Loading Error"
+          message={hasError?.message || 'Failed to load reports. Using fallback data.'}
+          action={
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                reportsData.refetch()
+                complianceData.refetch()
+              }}
+            >
+              Retry
+            </Button>
+          }
+          onClose={() => {}}
+        />
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -114,31 +138,43 @@ export function Reports() {
       </div>
 
       {/* Compliance Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-slate-400 text-sm">Total Emissions (6M)</p>
-            <p className="text-3xl font-bold text-white mt-2">2,350 tCO₂e</p>
-            <p className="text-sm text-success-400 mt-1">↓ 12% vs previous period</p>
-          </CardContent>
-        </Card>
+      {isLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <Spinner size="lg" message="Loading compliance metrics..." />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card>
+            <CardContent className="pt-6">
+              <p className="text-slate-400 text-sm">Total Emissions (6M)</p>
+              <p className="text-3xl font-bold text-white mt-2">
+                {complianceData.data?.total_emissions.toLocaleString() || '2,350'} tCO₂e
+              </p>
+              <p className="text-sm text-success-400 mt-1">↓ 12% vs previous period</p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-slate-400 text-sm">Compliance Rate</p>
-            <p className="text-3xl font-bold text-white mt-2">94.5%</p>
-            <p className="text-sm text-success-400 mt-1">↑ 2.3% from last month</p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <p className="text-slate-400 text-sm">Compliance Rate</p>
+              <p className="text-3xl font-bold text-white mt-2">
+                {complianceData.data?.compliance_rate.toFixed(1) || '94.5'}%
+              </p>
+              <p className="text-sm text-success-400 mt-1">↑ 2.3% from last month</p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-slate-400 text-sm">Reports Generated</p>
-            <p className="text-3xl font-bold text-white mt-2">24</p>
-            <p className="text-sm text-slate-400 mt-1">This fiscal year</p>
-          </CardContent>
-        </Card>
-      </div>
+          <Card>
+            <CardContent className="pt-6">
+              <p className="text-slate-400 text-sm">Reports Generated</p>
+              <p className="text-3xl font-bold text-white mt-2">
+                {complianceData.data?.reports_generated || '24'}
+              </p>
+              <p className="text-sm text-slate-400 mt-1">This fiscal year</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Emissions Trend Chart */}
       <Card>
