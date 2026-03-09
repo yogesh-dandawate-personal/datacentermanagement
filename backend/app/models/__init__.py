@@ -18,7 +18,7 @@ user_roles_association = Table(
 class Tenant(Base):
     """Multi-tenant organization"""
     __tablename__ = 'tenants'
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(255), nullable=False)
     slug = Column(String(100), unique=True, nullable=False)
@@ -26,17 +26,18 @@ class Tenant(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+
     # Relationships
     users = relationship("User", back_populates="tenant", cascade="all, delete-orphan")
     roles = relationship("Role", back_populates="tenant", cascade="all, delete-orphan")
     audit_logs = relationship("AuditLog", back_populates="tenant", cascade="all, delete-orphan")
+    organizations = relationship("Organization", back_populates="tenant", cascade="all, delete-orphan")
 
 
 class User(Base):
     """Platform user"""
     __tablename__ = 'users'
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id = Column(UUID(as_uuid=True), ForeignKey('tenants.id', ondelete='CASCADE'), nullable=False)
     keycloak_id = Column(String(255), unique=True)  # Keycloak user ID
@@ -46,11 +47,12 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+
     # Relationships
     tenant = relationship("Tenant", back_populates="users")
     roles = relationship("Role", secondary=user_roles_association, back_populates="users")
     audit_logs = relationship("AuditLog", back_populates="user")
+    organizations = relationship("Organization", secondary="user_organizations", back_populates="users")
 
 
 class Role(Base):

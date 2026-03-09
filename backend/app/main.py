@@ -22,6 +22,7 @@ from app.schemas import (
     ErrorResponse,
     HealthCheckResponse,
 )
+from app.routes.organizations import router as org_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -45,6 +46,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include routers
+app.include_router(org_router)
 
 # Global exception handler
 @app.exception_handler(NetZeroException)
