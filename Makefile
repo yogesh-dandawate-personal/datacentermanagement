@@ -14,7 +14,7 @@ NC = \033[0m # No Color
 help:
 	@echo "$(CYAN)iCarbon - SaaS ESG Emissions Platform$(NC)"
 	@echo ""
-	@echo "$(CYAN)Available commands:$(NC)"
+	@echo "$(CYAN)Development Commands:$(NC)"
 	@echo "  $(GREEN)make install$(NC)        - Install all dependencies"
 	@echo "  $(GREEN)make setup$(NC)          - Setup local development environment"
 	@echo "  $(GREEN)make dev$(NC)            - Start all services in development mode"
@@ -33,6 +33,13 @@ help:
 	@echo "  $(GREEN)make lint$(NC)           - Run linters"
 	@echo "  $(GREEN)make format$(NC)         - Format code"
 	@echo "  $(GREEN)make clean$(NC)          - Clean build artifacts"
+	@echo ""
+	@echo "$(CYAN)Autonomous Development (NEW):$(NC)"
+	@echo "  $(GREEN)make sprints-execute$(NC)  - Run all 13 sprints in parallel"
+	@echo "  $(GREEN)make live-progress$(NC)    - Real-time progress bar (updates every 5s)"
+	@echo "  $(GREEN)make live-progress-once$(NC) - Show current progress once"
+	@echo "  $(GREEN)make agent-status$(NC)     - Show agent utilization metrics"
+	@echo "  $(GREEN)make daily-standup$(NC)    - Generate daily standup report"
 
 # Installation
 install: install-backend install-frontend install-agents
@@ -266,6 +273,12 @@ progress-report:
 
 progress-watch:
 	@python3 scripts/progress-reporter.py --watch
+
+live-progress:
+	@python3 scripts/live-progress.py --watch
+
+live-progress-once:
+	@python3 scripts/live-progress.py
 
 daily-standup:
 	@python3 scripts/daily-standup-generator.py --date $(DATE)
