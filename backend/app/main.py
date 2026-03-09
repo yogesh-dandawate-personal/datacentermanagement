@@ -25,6 +25,7 @@ from app.schemas import (
 from app.routes.organizations import router as org_router
 from app.routes.telemetry import router as telemetry_router
 from app.routes.dashboards import router as dashboards_router
+from app.routes.carbon import router as carbon_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -52,6 +53,7 @@ app.add_middleware(
 app.include_router(org_router)
 app.include_router(telemetry_router)
 app.include_router(dashboards_router)
+app.include_router(carbon_router)
 
 # Global exception handler
 @app.exception_handler(NetZeroException)

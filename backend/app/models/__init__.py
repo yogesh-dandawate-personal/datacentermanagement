@@ -507,3 +507,117 @@ class TelemetryAnomaly(Base):
     # Relationships
     tenant = relationship("Tenant")
     meter = relationship("Meter")
+
+
+# Carbon Accounting models for Sprint 6
+class EmissionFactor(Base):
+    """Emission factors for carbon calculation (versioned)"""
+    __tablename__ = "emission_factors"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+
+    factor_name = Column(String(255), nullable=False, index=True)
+    factor_type = Column(String(50), nullable=False, index=True)  # scope1, scope2, fuel, electricity, refrigerant
+
+    value = Column(Numeric(12, 6), nullable=False)  # kg CO2e per unit
+    unit = Column(String(50), nullable=False)  # kWh, gallon, kg, etc.
+    unit_measurement = Column(String(50))  # metric: kg CO2e per [unit_measurement]
+
+    region = Column(String(100), index=True)  # US-East, Europe, Global, etc.
+    data_source = Column(String(255))  # EPA, IVA, regional grid operator, etc.
+
+    effective_date = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    obsolete_date = Column(DateTime, nullable=True, index=True)  # When this factor is no longer valid
+
+    is_active = Column(Boolean, default=True, index=True)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    versions = relationship("FactorVersion", back_populates="factor", cascade="all, delete-orphan")
+
+
+class FactorVersion(Base):
+    """Version history for emission factors"""
+    __tablename__ = "factor_versions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    factor_id = Column(UUID(as_uuid=True), ForeignKey("emission_factors.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    version_number = Column(Integer, nullable=False)
+    value = Column(Numeric(12, 6), nullable=False)
+
+    changelog = Column(Text)  # What changed in this version
+    effective_date = Column(DateTime, nullable=False, index=True)
+
+    status = Column(String(50), default="active", index=True)  # active, superseded, withdrawn
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    # Relationships
+    factor = relationship("EmissionFactor", back_populates="versions")
+
+
+class CarbonCalculation(Base):
+    """Carbon emissions calculation record"""
+    __tablename__ = "carbon_calculations"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    period_start = Column(DateTime, nullable=False, index=True)
+    period_end = Column(DateTime, nullable=False, index=True)
+
+    scope_1_emissions = Column(Numeric(18, 6), default=0)  # kg CO2e
+    scope_2_emissions = Column(Numeric(18, 6), default=0)  # kg CO2e
+    scope_3_emissions = Column(Numeric(18, 6), default=0)  # kg CO2e (placeholder)
+
+    total_emissions = Column(Numeric(18, 6), default=0)  # Sum of scopes, kg CO2e
+
+    status = Column(String(50), default="draft", index=True)  # draft, ready_for_review, approved, rejected
+
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    approved_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+
+    approval_notes = Column(Text)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    approved_at = Column(DateTime, nullable=True)
+
+    # Relationships
+    tenant = relationship("Tenant")
+    organization = relationship("Organization")
+    creator = relationship("User", foreign_keys=[created_by])
+    approver = relationship("User", foreign_keys=[approved_by])
+    details = relationship("CalculationDetail", back_populates="calculation", cascade="all, delete-orphan")
+
+
+class CalculationDetail(Base):
+    """Individual calculation line items with audit trail"""
+    __tablename__ = "calculation_details"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    calculation_id = Column(UUID(as_uuid=True), ForeignKey("carbon_calculations.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    calculation_type = Column(String(50), nullable=False, index=True)  # scope1_fuel, scope2_electricity, etc.
+    scope = Column(String(50), nullable=False)  # scope1, scope2, scope3
+
+    energy_input = Column(Numeric(12, 6), nullable=False)  # Amount consumed (kWh, gallons, etc.)
+    energy_unit = Column(String(50))  # kWh, gallon, kg, etc.
+
+    factor_id = Column(UUID(as_uuid=True), ForeignKey("emission_factors.id", ondelete="SET NULL"), nullable=True)
+    factor_version = Column(Integer)  # Version of factor used for audit trail
+    factor_value = Column(Numeric(12, 6))  # Factor value at time of calculation (for audit)
+
+    result = Column(Numeric(18, 6), nullable=False)  # Final emission result (kg CO2e)
+
+    notes = Column(Text)  # Additional context about this calculation
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    # Relationships
+    calculation = relationship("CarbonCalculation", back_populates="details")
+    factor = relationship("EmissionFactor")
