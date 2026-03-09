@@ -176,13 +176,13 @@ Two-tier deployment strategy:
 
 **Staging** (Automatic)
 - Triggered after each sprint completes
-- URL: `staging-inetze ro.vercel.app`
+- URL: `staging-netzero.vercel.app`
 - Auto-preview deployments
 - Health check verification
 
 **Production** (Manual with Approval)
 - Triggered after Sprint 13
-- URL: `app.inetze ro.io`
+- URL: `app.netzero.io`
 - Requires explicit confirmation
 - Pre-deployment verification:
   - ✓ All sprints complete

@@ -378,13 +378,13 @@ deploy-staging:
 	@echo "$(CYAN)Deploying to Vercel Staging...$(NC)"
 	@bash scripts/deploy-vercel.sh staging
 	@echo "$(GREEN)✓ Staging deployment complete$(NC)"
-	@echo "  URL: https://staging-inetze ro.vercel.app"
+	@echo "  URL: https://staging-netzero.vercel.app"
 
 deploy-production:
 	@echo "$(CYAN)Deploying to Vercel Production...$(NC)"
 	@bash scripts/deploy-vercel.sh production
 	@echo "$(GREEN)✓ Production deployment complete$(NC)"
-	@echo "  URL: https://app.inetze ro.io"
+	@echo "  URL: https://app.netzero.io"
 
 deploy-force-production:
 	@echo "$(RED)⚠ FORCING PRODUCTION DEPLOYMENT$(NC)"
