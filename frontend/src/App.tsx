@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { Landing } from './pages/Landing'
 import { Dashboard } from './pages/Dashboard'
+import { Energy } from './pages/Energy'
+import { Reports } from './pages/Reports'
 import { Layout } from './components/Layout'
 import { useState, useEffect } from 'react'
 
@@ -34,12 +36,7 @@ function App() {
               path="/energy"
               element={
                 <Layout>
-                  <div className="space-y-6">
-                    <h1 className="text-3xl font-bold text-white">Energy Management</h1>
-                    <div className="p-8 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl text-center">
-                      <p className="text-slate-300">Energy dashboard coming soon</p>
-                    </div>
-                  </div>
+                  <Energy />
                 </Layout>
               }
             />
@@ -47,12 +44,7 @@ function App() {
               path="/reports"
               element={
                 <Layout>
-                  <div className="space-y-6">
-                    <h1 className="text-3xl font-bold text-white">Reports</h1>
-                    <div className="p-8 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl text-center">
-                      <p className="text-slate-300">Reports dashboard coming soon</p>
-                    </div>
-                  </div>
+                  <Reports />
                 </Layout>
               }
             />
