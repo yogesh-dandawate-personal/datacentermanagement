@@ -1,7 +1,7 @@
 """Organization management API routes"""
 from fastapi import APIRouter, HTTPException, Depends, Header, Query
 from sqlalchemy.orm import Session
-from typing import Optional, List
+from typing import Optional
 import logging
 import uuid
 from datetime import datetime
@@ -10,38 +10,18 @@ from app.database import get_db
 from app.auth.jwt_handler import verify_token
 from app.auth.utils import extract_token_from_header
 from app.models import Organization, Department, Position, Tenant, User
-from app.schemas import ErrorResponse
+from app.schemas import (
+    OrganizationCreate,
+    OrganizationUpdate,
+    OrganizationResponse,
+    OrganizationTreeNode,
+    OrganizationListResponse,
+    ErrorResponse
+)
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1", tags=["organizations"])
-
-
-# Schemas for organization operations
-class OrganizationCreate:
-    """Request to create organization"""
-    def __init__(self, name: str, slug: str, parent_id: Optional[str] = None,
-                 description: Optional[str] = None, metadata: Optional[dict] = None):
-        self.name = name
-        self.slug = slug
-        self.parent_id = parent_id
-        self.description = description
-        self.metadata = metadata or {}
-
-
-class OrganizationResponse:
-    """Organization response"""
-    def __init__(self, org: Organization):
-        self.id = str(org.id)
-        self.tenant_id = str(org.tenant_id)
-        self.parent_id = str(org.parent_id) if org.parent_id else None
-        self.name = org.name
-        self.slug = org.slug
-        self.description = org.description
-        self.hierarchy_level = org.hierarchy_level
-        self.is_active = org.is_active
-        self.created_at = org.created_at.isoformat()
-        self.created_by = str(org.created_by) if org.created_by else None
 
 
 def get_current_user(authorization: str = Header(None), db: Session = Depends(get_db)):
@@ -59,13 +39,33 @@ def get_current_user(authorization: str = Header(None), db: Session = Depends(ge
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-@router.post("/orgs", response_model=dict, status_code=201)
+def get_organization_or_404(db: Session, org_id: str, tenant_id: str) -> Organization:
+    """Helper to get organization or raise 404"""
+    org = db.query(Organization).filter_by(
+        id=org_id,
+        tenant_id=tenant_id
+    ).first()
+
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+
+    return org
+
+
+def build_organization_tree(org: Organization, db: Session) -> dict:
+    """Recursively build organization tree structure"""
+    children = db.query(Organization).filter_by(parent_id=org.id).all()
+    return {
+        "id": str(org.id),
+        "name": org.name,
+        "hierarchy_level": org.hierarchy_level,
+        "children": [build_organization_tree(child, db) for child in children]
+    }
+
+
+@router.post("/orgs", response_model=OrganizationResponse, status_code=201)
 async def create_organization(
-    name: str,
-    slug: str,
-    parent_id: Optional[str] = None,
-    description: Optional[str] = None,
-    metadata: Optional[dict] = None,
+    org_data: OrganizationCreate,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
@@ -76,16 +76,12 @@ async def create_organization(
     Can specify parent for hierarchical relationship.
 
     Args:
-        name: Organization name
-        slug: URL-friendly slug
-        parent_id: Parent organization ID (optional)
-        description: Organization description (optional)
-        metadata: Additional metadata (optional)
+        org_data: Organization creation data
 
     Returns:
         Created organization details
     """
-    logger.info(f"Creating organization: {slug} for tenant {current_user['tenant_id']}")
+    logger.info(f"Creating organization: {org_data.slug} for tenant {current_user['tenant_id']}")
 
     try:
         # Verify tenant exists
@@ -95,26 +91,19 @@ async def create_organization(
 
         # Check hierarchy level if parent provided
         hierarchy_level = 0
-        if parent_id:
-            parent = db.query(Organization).filter_by(
-                id=parent_id,
-                tenant_id=current_user['tenant_id']
-            ).first()
-
-            if not parent:
-                raise HTTPException(status_code=404, detail="Parent organization not found")
-
+        if org_data.parent_id:
+            parent = get_organization_or_404(db, org_data.parent_id, current_user['tenant_id'])
             hierarchy_level = parent.hierarchy_level + 1
 
         # Create organization
         org = Organization(
             tenant_id=current_user['tenant_id'],
-            parent_id=parent_id if parent_id else None,
-            name=name,
-            slug=slug,
-            description=description,
+            parent_id=org_data.parent_id,
+            name=org_data.name,
+            slug=org_data.slug,
+            description=org_data.description,
             hierarchy_level=hierarchy_level,
-            metadata=metadata or {},
+            org_metadata=org_data.org_metadata,
             created_by=current_user['user_id']
         )
 
@@ -124,15 +113,7 @@ async def create_organization(
 
         logger.info(f"Organization created: {org.id}")
 
-        return {
-            "id": str(org.id),
-            "tenant_id": str(org.tenant_id),
-            "parent_id": str(org.parent_id) if org.parent_id else None,
-            "name": org.name,
-            "slug": org.slug,
-            "hierarchy_level": org.hierarchy_level,
-            "created_at": org.created_at.isoformat()
-        }
+        return org
 
     except HTTPException:
         raise
@@ -142,7 +123,7 @@ async def create_organization(
         raise HTTPException(status_code=500, detail="Failed to create organization")
 
 
-@router.get("/orgs/{org_id}")
+@router.get("/orgs/{org_id}", response_model=OrganizationResponse)
 async def get_organization(
     org_id: str,
     db: Session = Depends(get_db),
@@ -158,25 +139,8 @@ async def get_organization(
         Organization details
     """
     try:
-        org = db.query(Organization).filter_by(
-            id=org_id,
-            tenant_id=current_user['tenant_id']
-        ).first()
-
-        if not org:
-            raise HTTPException(status_code=404, detail="Organization not found")
-
-        return {
-            "id": str(org.id),
-            "tenant_id": str(org.tenant_id),
-            "parent_id": str(org.parent_id) if org.parent_id else None,
-            "name": org.name,
-            "slug": org.slug,
-            "description": org.description,
-            "hierarchy_level": org.hierarchy_level,
-            "is_active": org.is_active,
-            "created_at": org.created_at.isoformat()
-        }
+        org = get_organization_or_404(db, org_id, current_user['tenant_id'])
+        return org
 
     except HTTPException:
         raise
@@ -185,7 +149,7 @@ async def get_organization(
         raise HTTPException(status_code=500, detail="Failed to retrieve organization")
 
 
-@router.get("/orgs")
+@router.get("/orgs", response_model=OrganizationListResponse)
 async def list_organizations(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
@@ -215,16 +179,7 @@ async def list_organizations(
             "total": total,
             "skip": skip,
             "limit": limit,
-            "organizations": [
-                {
-                    "id": str(org.id),
-                    "name": org.name,
-                    "slug": org.slug,
-                    "hierarchy_level": org.hierarchy_level,
-                    "is_active": org.is_active
-                }
-                for org in orgs
-            ]
+            "organizations": orgs
         }
 
     except Exception as e:
@@ -232,12 +187,10 @@ async def list_organizations(
         raise HTTPException(status_code=500, detail="Failed to list organizations")
 
 
-@router.put("/orgs/{org_id}")
+@router.put("/orgs/{org_id}", response_model=OrganizationResponse)
 async def update_organization(
     org_id: str,
-    name: Optional[str] = None,
-    description: Optional[str] = None,
-    is_active: Optional[bool] = None,
+    org_update: OrganizationUpdate,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
@@ -246,28 +199,21 @@ async def update_organization(
 
     Args:
         org_id: Organization ID
-        name: New organization name (optional)
-        description: New description (optional)
-        is_active: Active status (optional)
+        org_update: Organization update data
 
     Returns:
         Updated organization
     """
     try:
-        org = db.query(Organization).filter_by(
-            id=org_id,
-            tenant_id=current_user['tenant_id']
-        ).first()
+        org = get_organization_or_404(db, org_id, current_user['tenant_id'])
 
-        if not org:
-            raise HTTPException(status_code=404, detail="Organization not found")
-
-        if name:
-            org.name = name
-        if description is not None:
-            org.description = description
-        if is_active is not None:
-            org.is_active = is_active
+        # Update fields that are provided
+        if org_update.name:
+            org.name = org_update.name
+        if org_update.description is not None:
+            org.description = org_update.description
+        if org_update.is_active is not None:
+            org.is_active = org_update.is_active
 
         org.updated_at = datetime.utcnow()
         db.commit()
@@ -275,13 +221,7 @@ async def update_organization(
 
         logger.info(f"Organization updated: {org.id}")
 
-        return {
-            "id": str(org.id),
-            "name": org.name,
-            "description": org.description,
-            "is_active": org.is_active,
-            "updated_at": org.updated_at.isoformat()
-        }
+        return org
 
     except HTTPException:
         raise
@@ -307,13 +247,7 @@ async def delete_organization(
         No content
     """
     try:
-        org = db.query(Organization).filter_by(
-            id=org_id,
-            tenant_id=current_user['tenant_id']
-        ).first()
-
-        if not org:
-            raise HTTPException(status_code=404, detail="Organization not found")
+        org = get_organization_or_404(db, org_id, current_user['tenant_id'])
 
         # Check for children
         children = db.query(Organization).filter_by(parent_id=org_id).all()
@@ -354,14 +288,7 @@ async def get_organization_children(
         List of child organizations
     """
     try:
-        org = db.query(Organization).filter_by(
-            id=org_id,
-            tenant_id=current_user['tenant_id']
-        ).first()
-
-        if not org:
-            raise HTTPException(status_code=404, detail="Organization not found")
-
+        org = get_organization_or_404(db, org_id, current_user['tenant_id'])
         children = db.query(Organization).filter_by(parent_id=org_id).all()
 
         return {
@@ -399,25 +326,8 @@ async def get_organization_tree(
         Full hierarchy tree
     """
     try:
-        org = db.query(Organization).filter_by(
-            id=org_id,
-            tenant_id=current_user['tenant_id']
-        ).first()
-
-        if not org:
-            raise HTTPException(status_code=404, detail="Organization not found")
-
-        def build_tree(org_obj):
-            """Recursively build tree structure"""
-            children = db.query(Organization).filter_by(parent_id=org_obj.id).all()
-            return {
-                "id": str(org_obj.id),
-                "name": org_obj.name,
-                "hierarchy_level": org_obj.hierarchy_level,
-                "children": [build_tree(child) for child in children]
-            }
-
-        return build_tree(org)
+        org = get_organization_or_404(db, org_id, current_user['tenant_id'])
+        return build_organization_tree(org, db)
 
     except HTTPException:
         raise

@@ -140,3 +140,79 @@ class HealthCheckResponse(BaseModel):
                 "timestamp": "2026-03-09T15:30:00"
             }
         }
+
+
+# Organization Schemas
+class OrganizationCreate(BaseModel):
+    """Request schema for creating organization"""
+    name: str = Field(..., min_length=1, max_length=255, description="Organization name")
+    slug: str = Field(..., min_length=1, max_length=100, description="URL-friendly slug")
+    parent_id: Optional[str] = Field(None, description="Parent organization ID for hierarchy")
+    description: Optional[str] = Field(None, max_length=1000, description="Organization description")
+    org_metadata: Optional[dict] = Field(default_factory=dict, description="Additional metadata")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "name": "Engineering",
+                "slug": "eng",
+                "parent_id": None,
+                "description": "Engineering department",
+                "org_metadata": {}
+            }
+        }
+
+
+class OrganizationUpdate(BaseModel):
+    """Request schema for updating organization"""
+    name: Optional[str] = Field(None, min_length=1, max_length=255, description="Organization name")
+    description: Optional[str] = Field(None, max_length=1000, description="Organization description")
+    is_active: Optional[bool] = Field(None, description="Active status")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "name": "Engineering Dept",
+                "description": "Updated description",
+                "is_active": True
+            }
+        }
+
+
+class OrganizationResponse(BaseModel):
+    """Response schema for organization"""
+    id: str
+    tenant_id: str
+    parent_id: Optional[str]
+    name: str
+    slug: str
+    description: Optional[str]
+    hierarchy_level: int
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class OrganizationTreeNode(BaseModel):
+    """Tree node for organization hierarchy"""
+    id: str
+    name: str
+    hierarchy_level: int
+    children: list['OrganizationTreeNode'] = Field(default_factory=list)
+
+    class Config:
+        from_attributes = True
+
+
+OrganizationTreeNode.model_rebuild()
+
+
+class OrganizationListResponse(BaseModel):
+    """Response schema for listing organizations"""
+    total: int
+    skip: int
+    limit: int
+    organizations: list[OrganizationResponse]

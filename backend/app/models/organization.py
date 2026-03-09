@@ -5,7 +5,8 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 import uuid
 
-from app.models import Base
+# Base will be set by models/__init__.py after import
+Base = None
 
 
 class Organization(Base):
@@ -25,7 +26,7 @@ class Organization(Base):
     display_order = Column(Integer, default=0)
     is_active = Column(Boolean, default=True, index=True)
 
-    metadata = Column(JSON, default=dict)
+    org_metadata = Column(JSON, default=dict)
 
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)

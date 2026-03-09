@@ -5,7 +5,11 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 import uuid
 
-from app.models import Base
+# This module is imported after models/__init__.py, so Base should be available
+# We use a delayed import to avoid circular dependency issues
+def _get_base():
+    from app.models import Base
+    return Base
 
 
 class Facility(Base):
@@ -29,7 +33,7 @@ class Facility(Base):
     available_capacity = Column(Numeric(12, 2))  # Available capacity
 
     is_active = Column(Boolean, default=True, index=True)
-    metadata = Column(JSON, default=dict)
+    facility_metadata = Column(JSON, default=dict)
 
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)

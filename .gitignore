@@ -117,3 +117,4 @@ backend/htmlcov/
 agents/.pytest_cache/
 agents/htmlcov/
 agents/*.egg-info/
+.vercel
