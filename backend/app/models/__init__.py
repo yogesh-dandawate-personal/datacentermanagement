@@ -14,6 +14,14 @@ user_roles_association = Table(
     Column('role_id', UUID(as_uuid=True), ForeignKey('roles.id', ondelete='CASCADE'))
 )
 
+# Association table for user-facility many-to-many
+facility_users = Table(
+    'facility_users',
+    Base.metadata,
+    Column('user_id', UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE')),
+    Column('facility_id', UUID(as_uuid=True), ForeignKey('facilities.id', ondelete='CASCADE'))
+)
+
 
 class Tenant(Base):
     """Multi-tenant organization"""
@@ -32,6 +40,7 @@ class Tenant(Base):
     roles = relationship("Role", back_populates="tenant", cascade="all, delete-orphan")
     audit_logs = relationship("AuditLog", back_populates="tenant", cascade="all, delete-orphan")
     organizations = relationship("Organization", back_populates="tenant", cascade="all, delete-orphan")
+    facilities = relationship("Facility", back_populates="tenant", cascade="all, delete-orphan")
 
 
 class User(Base):
@@ -53,6 +62,7 @@ class User(Base):
     roles = relationship("Role", secondary=user_roles_association, back_populates="users")
     audit_logs = relationship("AuditLog", back_populates="user")
     organizations = relationship("Organization", secondary="user_organizations", back_populates="users")
+    facilities = relationship("Facility", secondary=facility_users, back_populates="users")
 
 
 class Role(Base):
