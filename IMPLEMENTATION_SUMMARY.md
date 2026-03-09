@@ -176,7 +176,7 @@ Two-tier deployment strategy:
 
 **Staging** (Automatic)
 - Triggered after each sprint completes
-- URL: `staging-netzero.vercel.app`
+- URL: `netzero.vercel.app`
 - Auto-preview deployments
 - Health check verification
 

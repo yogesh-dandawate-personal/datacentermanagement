@@ -221,13 +221,13 @@
   },
   "vercel_deployment": {
     "enabled": true,
-    "project_name": "netzero-platform",
+    "project_name": "netzero",
     "environments": {
       "staging": {
-        "url": "staging-netzero.vercel.app",
+        "url": "netzero.vercel.app",
         "auto_deploy": true,
         "preview_deployments": true,
-        "API_URL": "https://api-staging-netzero.vercel.app"
+        "API_URL": "https://api.netzero.vercel.app"
       },
       "production": {
         "url": "app.netzero.io",

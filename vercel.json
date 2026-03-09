@@ -1,7 +1,7 @@
 {
   "version": 2,
   "projectSettings": {
-    "projectName": "netzero-platform",
+    "projectName": "netzero",
     "framework": "nextjs"
   },
   "buildCommand": "npm run build",
