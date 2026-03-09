@@ -1,4 +1,12 @@
-"""Telemetry ingestion, validation, and normalization service"""
+"""
+Telemetry ingestion, validation, and normalization service
+
+This module provides:
+- ValidationService: Validates telemetry readings against device specs
+- NormalizationService: Normalizes units, timestamps, and precision
+- AnomalyDetectionService: Detects stale feeds and outliers
+- TelemetryService: Main orchestration service for the complete pipeline
+"""
 
 from typing import List, Dict, Optional, Tuple
 from decimal import Decimal
@@ -17,6 +25,12 @@ from app.models import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Constants
+STALE_FEED_THRESHOLD = timedelta(hours=1)
+OUTLIER_Z_SCORE_THRESHOLD = 3.0
+MIN_READINGS_FOR_OUTLIER_DETECTION = 5
+OUTLIER_CRITICAL_THRESHOLD = 5.0
 
 
 class ValidationService:
@@ -203,19 +217,22 @@ class NormalizationService:
 
 
 class AnomalyDetectionService:
-    """Detects anomalies in telemetry data"""
+    """
+    Detects anomalies in telemetry data
 
-    STALE_FEED_THRESHOLD = timedelta(hours=1)  # No reading for >1 hour
-    OUTLIER_THRESHOLD = 3.0  # Standard deviations
+    Detections:
+    - Stale feeds: No reading received within threshold period
+    - Outliers: Values deviating more than threshold std devs from mean
+    """
 
     @staticmethod
     def detect_stale_feed(
         db: Session, meter_id: str, current_timestamp: datetime
     ) -> Optional[Dict]:
         """
-        Detect if meter hasn't reported in >1 hour
+        Detect if meter hasn't reported in the threshold period
 
-        Returns anomaly dict if stale, None otherwise
+        Returns anomaly dict if stale (high severity), None otherwise
         """
         last_reading = (
             db.query(TelemetryReading)
@@ -228,7 +245,7 @@ class AnomalyDetectionService:
             return None
 
         time_since_last = current_timestamp - last_reading.timestamp
-        if time_since_last > AnomalyDetectionService.STALE_FEED_THRESHOLD:
+        if time_since_last > STALE_FEED_THRESHOLD:
             return {
                 "anomaly_type": "stale_feed",
                 "severity": "high",
@@ -250,7 +267,8 @@ class AnomalyDetectionService:
         """
         Detect if value is an outlier based on recent history
 
-        Returns anomaly dict if outlier, None otherwise
+        Uses Z-score method: (value - mean) / std_dev
+        Returns anomaly dict if outlier exceeds threshold, None otherwise
         """
         lookback = current_timestamp - timedelta(hours=lookback_hours)
 
@@ -266,7 +284,7 @@ class AnomalyDetectionService:
             .all()
         )
 
-        if len(readings) < 5:  # Need at least 5 readings for statistics
+        if len(readings) < MIN_READINGS_FOR_OUTLIER_DETECTION:
             return None
 
         values = [float(r.value) for r in readings]
@@ -274,17 +292,17 @@ class AnomalyDetectionService:
         variance = sum((x - mean) ** 2 for x in values) / len(values)
         std_dev = variance ** 0.5
 
-        # Check if value is outlier (>3 std devs from mean)
+        # Check if value is outlier (>threshold std devs from mean)
         z_score = abs((value - mean) / std_dev) if std_dev > 0 else 0
 
-        if z_score > AnomalyDetectionService.OUTLIER_THRESHOLD:
-            severity = "critical" if z_score > 5 else "high"
+        if z_score > OUTLIER_Z_SCORE_THRESHOLD:
+            severity = "critical" if z_score > OUTLIER_CRITICAL_THRESHOLD else "high"
             return {
                 "anomaly_type": "outlier",
                 "severity": severity,
                 "expected_value": mean,
                 "actual_value": value,
-                "resolution_notes": f"Z-score: {z_score:.2f}",
+                "resolution_notes": f"Z-score: {z_score:.2f} (threshold: {OUTLIER_Z_SCORE_THRESHOLD})",
             }
 
         return None
