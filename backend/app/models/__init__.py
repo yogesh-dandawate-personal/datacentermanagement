@@ -621,3 +621,111 @@ class CalculationDetail(Base):
     # Relationships
     calculation = relationship("CarbonCalculation", back_populates="details")
     factor = relationship("EmissionFactor")
+
+
+# KPI models for Sprint 7
+class KPIDefinition(Base):
+    """KPI definitions with formulas and targets"""
+    __tablename__ = "kpi_definitions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    kpi_name = Column(String(100), nullable=False, index=True)  # PUE, CUE, WUE, ERE, or custom
+    kpi_type = Column(String(50), nullable=False)  # standard, custom
+    formula = Column(Text, nullable=False)  # Human-readable formula description
+    formula_code = Column(Text)  # Python/SQL code for calculation
+    unit = Column(String(50), nullable=False)  # %, L/kWh, g CO2/kWh, etc.
+
+    target_value = Column(Numeric(12, 6))  # Target value for this KPI
+    lower_bound = Column(Numeric(12, 6))  # Good range lower bound
+    upper_bound = Column(Numeric(12, 6))  # Good range upper bound
+
+    is_active = Column(Boolean, default=True, index=True)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    tenant = relationship("Tenant")
+    organization = relationship("Organization")
+    snapshots = relationship("KPISnapshot", back_populates="kpi", cascade="all, delete-orphan")
+    thresholds = relationship("KPIThreshold", back_populates="kpi", cascade="all, delete-orphan")
+
+
+class KPISnapshot(Base):
+    """Time-series KPI data points"""
+    __tablename__ = "kpi_snapshots"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    kpi_id = Column(UUID(as_uuid=True), ForeignKey("kpi_definitions.id", ondelete="CASCADE"), nullable=False, index=True)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    snapshot_date = Column(DateTime, nullable=False, index=True)
+    calculated_value = Column(Numeric(18, 6), nullable=False)
+    target_value = Column(Numeric(18, 6))
+
+    variance_percent = Column(Numeric(8, 2))  # Deviation from target
+    status = Column(String(50), default="normal", index=True)  # normal, warning, critical
+
+    calculation_details = Column(JSON)  # Intermediate values used in calculation
+    data_quality_score = Column(Numeric(5, 2))  # 0-100, how complete the data was
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    # Relationships
+    kpi = relationship("KPIDefinition", back_populates="snapshots")
+    tenant = relationship("Tenant")
+
+
+class KPIThreshold(Base):
+    """Alerting thresholds for KPIs"""
+    __tablename__ = "kpi_thresholds"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    kpi_id = Column(UUID(as_uuid=True), ForeignKey("kpi_definitions.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    threshold_name = Column(String(100), nullable=False)
+    threshold_value = Column(Numeric(12, 6), nullable=False)
+    operator = Column(String(10), nullable=False, index=True)  # >, <, >=, <=, ==, !=
+
+    alert_severity = Column(String(20), nullable=False)  # info, warning, critical
+    is_enabled = Column(Boolean, default=True, index=True)
+
+    # Notification settings
+    notify_email = Column(Boolean, default=True)
+    notify_slack = Column(Boolean, default=False)
+    notify_webhook = Column(String(500))  # Optional webhook URL
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    # Relationships
+    kpi = relationship("KPIDefinition", back_populates="thresholds")
+
+
+class KPIThresholdBreach(Base):
+    """Records when a threshold is breached"""
+    __tablename__ = "kpi_threshold_breaches"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    threshold_id = Column(UUID(as_uuid=True), ForeignKey("kpi_thresholds.id", ondelete="CASCADE"), nullable=False, index=True)
+    kpi_id = Column(UUID(as_uuid=True), ForeignKey("kpi_definitions.id", ondelete="CASCADE"), nullable=False, index=True)
+    snapshot_id = Column(UUID(as_uuid=True), ForeignKey("kpi_snapshots.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    breach_value = Column(Numeric(18, 6), nullable=False)
+    expected_value = Column(Numeric(18, 6))
+
+    severity = Column(String(20), nullable=False, index=True)  # info, warning, critical
+    status = Column(String(50), default="open", index=True)  # open, acknowledged, resolved
+
+    resolution_notes = Column(Text)
+    acknowledged_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    acknowledged_at = Column(DateTime)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+
+    # Relationships
+    threshold = relationship("KPIThreshold")
+    kpi = relationship("KPIDefinition")
+    snapshot = relationship("KPISnapshot")
