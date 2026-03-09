@@ -6,11 +6,18 @@ export function Settings() {
   const [activeTab, setActiveTab] = useState('profile')
   const [isSaving, setIsSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [formData, setFormData] = useState({
     fullName: 'John Doe',
     email: 'john@company.com',
     company: 'iNetZero Corp',
     timezone: 'UTC-8',
+    orgName: 'iNetZero Corp',
+    supportEmail: 'support@company.com',
+    industry: 'Data Center Operations',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
   })
 
   const handleSave = async () => {
@@ -152,10 +159,26 @@ export function Settings() {
               <CardDescription>Manage your organization</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Input label="Organization Name" placeholder="iNetZero Corp" disabled={isSaving} />
-              <Input label="Organization ID" placeholder="org_12345" disabled />
-              <Input label="Support Email" placeholder="support@company.com" disabled={isSaving} />
-              <Input label="Industry" placeholder="Data Center Operations" disabled={isSaving} />
+              <Input
+                label="Organization Name"
+                value={formData.orgName}
+                onChange={(e) => setFormData({ ...formData, orgName: e.target.value })}
+                disabled={isSaving}
+              />
+              <Input label="Organization ID" value="org_12345" disabled />
+              <Input
+                label="Support Email"
+                type="email"
+                value={formData.supportEmail}
+                onChange={(e) => setFormData({ ...formData, supportEmail: e.target.value })}
+                disabled={isSaving}
+              />
+              <Input
+                label="Industry"
+                value={formData.industry}
+                onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                disabled={isSaving}
+              />
             </CardContent>
             <CardFooter>
               <Button variant="outline" disabled={isSaving}>Cancel</Button>
@@ -253,13 +276,45 @@ export function Settings() {
               <CardDescription>Change your password regularly to keep your account secure</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Input label="Current Password" type="password" placeholder="••••••••" />
-              <Input label="New Password" type="password" placeholder="••••••••" />
-              <Input label="Confirm Password" type="password" placeholder="••••••••" />
+              <Input
+                label="Current Password"
+                type="password"
+                value={formData.currentPassword}
+                onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
+                disabled={isSaving}
+              />
+              <Input
+                label="New Password"
+                type="password"
+                value={formData.newPassword}
+                onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
+                hint="Minimum 8 characters"
+                disabled={isSaving}
+              />
+              <Input
+                label="Confirm Password"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                disabled={isSaving}
+              />
             </CardContent>
             <CardFooter>
-              <Button variant="outline">Cancel</Button>
-              <Button variant="primary">Update Password</Button>
+              <Button variant="outline" disabled={isSaving}>Cancel</Button>
+              <Button
+                variant="primary"
+                onClick={handleSave}
+                disabled={isSaving || !formData.currentPassword || !formData.newPassword || !formData.confirmPassword}
+              >
+                {isSaving ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin mr-2" />
+                    Updating...
+                  </>
+                ) : (
+                  'Update Password'
+                )}
+              </Button>
             </CardFooter>
           </Card>
 
@@ -412,6 +467,47 @@ export function Settings() {
               <LogOut className="w-4 h-4 mr-2" />
               Sign out all devices
             </Button>
+          </div>
+
+          <div className="p-4 bg-danger-500/10 border border-danger-500/20 rounded-lg">
+            <p className="text-white font-medium mb-2">Delete account</p>
+            <p className="text-sm text-danger-300 mb-4">Permanently delete your account and all associated data. This cannot be undone.</p>
+            {deleteConfirm ? (
+              <div className="space-y-3">
+                <p className="text-sm text-danger-300">Type your email to confirm: <span className="font-mono text-white">{formData.email}</span></p>
+                <Input
+                  placeholder={formData.email}
+                  disabled={isSaving}
+                  className="bg-danger-500/20"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setDeleteConfirm(false)}
+                    disabled={isSaving}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? 'Deleting...' : 'Delete Account'}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => setDeleteConfirm(true)}
+              >
+                Delete Account
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
