@@ -100,6 +100,12 @@ export function Reports() {
 
   const isLoading = reportsData.loading || complianceData.loading
   const hasError = reportsData.error || complianceData.error
+  const hasReports = paginatedReports.length > 0
+
+  const handleGenerateReport = () => {
+    // TODO: Open report generation dialog
+    console.log('Generate new report')
+  }
 
   return (
     <div className="space-y-6">
@@ -131,7 +137,12 @@ export function Reports() {
           <h1 className="text-3xl font-bold text-white mb-2">Reports & Compliance</h1>
           <p className="text-slate-400">Generate and manage ESG compliance reports</p>
         </div>
-        <Button variant="primary" size="lg" className="flex items-center gap-2">
+        <Button
+          variant="primary"
+          size="lg"
+          className="flex items-center gap-2"
+          onClick={handleGenerateReport}
+        >
           <FileText className="w-5 h-5" />
           New Report
         </Button>
@@ -183,25 +194,34 @@ export function Reports() {
           <CardDescription>Monthly breakdown of carbon emissions by scope</CardDescription>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={350}>
-            <BarChart data={complianceData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis dataKey="month" stroke="#64748b" />
-              <YAxis stroke="#64748b" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#1e293b',
-                  border: '1px solid #475569',
-                  borderRadius: '8px',
-                }}
-                labelStyle={{ color: '#e2e8f0' }}
-              />
-              <Legend />
-              <Bar dataKey="scope1" stackId="a" fill="#ef4444" name="Scope 1" />
-              <Bar dataKey="scope2" stackId="a" fill="#f59e0b" name="Scope 2" />
-              <Bar dataKey="scope3" stackId="a" fill="#0ea5e9" name="Scope 3" />
-            </BarChart>
-          </ResponsiveContainer>
+          {isLoading ? (
+            <div className="w-full h-96 animate-pulse bg-slate-800/50 rounded flex items-end justify-around p-8 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex-1 bg-slate-700/50 rounded-t" style={{ height: `${Math.random() * 100 + 20}%` }} />
+              ))}
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart data={complianceData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <XAxis dataKey="month" stroke="#64748b" style={{ fontSize: '12px' }} />
+                <YAxis stroke="#64748b" style={{ fontSize: '12px' }} label={{ value: 'tCO₂e', angle: -90, position: 'insideLeft' }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#0f172a',
+                    border: '1px solid #64748b',
+                    borderRadius: '8px',
+                  }}
+                  labelStyle={{ color: '#f1f5f9' }}
+                  formatter={(value) => `${value} tCO₂e`}
+                />
+                <Legend wrapperStyle={{ paddingTop: '20px', color: '#cbd5e1' }} />
+                <Bar dataKey="scope1" stackId="a" fill="#ef4444" name="Scope 1" />
+                <Bar dataKey="scope2" stackId="a" fill="#f59e0b" name="Scope 2" />
+                <Bar dataKey="scope3" stackId="a" fill="#0ea5e9" name="Scope 3" />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </CardContent>
       </Card>
 
@@ -259,26 +279,30 @@ export function Reports() {
           </div>
 
           {/* Reports Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-slate-800/50 border-b border-slate-700/30">
-                  <th className="px-6 py-4 text-left font-semibold text-slate-200">Name</th>
-                  <th className="px-6 py-4 text-left font-semibold text-slate-200">Date</th>
-                  <th className="px-6 py-4 text-left font-semibold text-slate-200">Type</th>
-                  <th className="px-6 py-4 text-left font-semibold text-slate-200">Status</th>
-                  <th className="px-6 py-4 text-left font-semibold text-slate-200">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedReports.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center text-slate-400">
-                      No reports found matching your filters
-                    </td>
+          {!hasReports ? (
+            <div className="py-12 text-center">
+              <FileText className="w-12 h-12 text-slate-500 mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-medium text-white mb-2">No reports yet</h3>
+              <p className="text-slate-400 mb-6">Generate your first compliance report to get started</p>
+              <Button variant="primary" onClick={handleGenerateReport}>
+                <FileText className="w-4 h-4 mr-2" />
+                Generate First Report
+              </Button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-800/50 border-b border-slate-700/30">
+                    <th className="px-6 py-4 text-left font-semibold text-slate-200">Name</th>
+                    <th className="px-6 py-4 text-left font-semibold text-slate-200">Date</th>
+                    <th className="px-6 py-4 text-left font-semibold text-slate-200">Type</th>
+                    <th className="px-6 py-4 text-left font-semibold text-slate-200">Status</th>
+                    <th className="px-6 py-4 text-left font-semibold text-slate-200">Actions</th>
                   </tr>
-                ) : (
-                  paginatedReports.map((report) => (
+                </thead>
+                <tbody>
+                  {paginatedReports.map((report) => (
                     <tr key={report.id} className="border-b border-slate-700/30 hover:bg-slate-800/30 transition">
                       <td className="px-6 py-4 text-slate-300">
                         <div className="flex items-center gap-2">
@@ -312,14 +336,14 @@ export function Reports() {
                         </div>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {/* Pagination */}
-          {totalPages > 1 && (
+          {hasReports && totalPages > 1 && (
             <div className="flex justify-center mt-6">
               <Pagination
                 currentPage={currentPage}
