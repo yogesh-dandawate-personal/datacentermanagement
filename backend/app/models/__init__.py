@@ -62,7 +62,8 @@ class User(Base):
     tenant = relationship("Tenant", back_populates="users")
     roles = relationship("Role", secondary=user_roles_association, back_populates="users")
     audit_logs = relationship("AuditLog", back_populates="user")
-    organizations = relationship("Organization", secondary="user_organizations", back_populates="users")
+    # Use association class for user-organization relationships (allows role/position tracking)
+    organization_assignments = relationship("UserOrganization", back_populates="user")
     facilities = relationship("Facility", secondary=facility_users, back_populates="users")
 
 
@@ -129,7 +130,7 @@ class Organization(Base):
     # Relationships
     tenant = relationship("Tenant", back_populates="organizations")
     parent = relationship("Organization", remote_side=[id], backref="children")
-    users = relationship("User", secondary="user_organizations", back_populates="organizations")
+    user_assignments = relationship("UserOrganization", back_populates="organization")
 
 
 class Department(Base):
@@ -193,8 +194,8 @@ class UserOrganization(Base):
     assigned_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
     # Relationships
-    user = relationship("User", back_populates="organizations")
-    organization = relationship("Organization", back_populates="users")
+    user = relationship("User", back_populates="organization_assignments")
+    organization = relationship("Organization", back_populates="user_assignments")
     position = relationship("Position")
     role = relationship("Role")
 
