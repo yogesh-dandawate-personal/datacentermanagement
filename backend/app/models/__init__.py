@@ -1243,3 +1243,148 @@ class ReportTemplate(Base):
     # Relationships
     tenant_obj = relationship("Tenant")
     creator_user = relationship("User", foreign_keys=[created_by])
+
+
+# ============================================================================
+# SPRINT 12: INTEGRATIONS & API GATEWAY MODELS
+# ============================================================================
+
+class APIIntegration(Base):
+    """Third-party API integrations"""
+    __tablename__ = "api_integrations"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    integration_type = Column(String(100), nullable=False)  # salesforce, sap, snowflake, etc.
+    api_key = Column(String(500))
+    api_secret = Column(String(500))
+    api_endpoint = Column(String(500))
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    tenant_relation = relationship("Tenant")
+
+
+class APILog(Base):
+    """Logging for API calls"""
+    __tablename__ = "api_logs"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    integration_id = Column(UUID(as_uuid=True), ForeignKey("api_integrations.id", ondelete="SET NULL"))
+    method = Column(String(10))
+    endpoint = Column(String(500))
+    status_code = Column(Integer)
+    response_time_ms = Column(Integer)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    tenant_relation = relationship("Tenant")
+
+
+# ============================================================================
+# SPRINT 13: MOBILE APP MODELS
+# ============================================================================
+
+class MobileSession(Base):
+    """Mobile app sessions"""
+    __tablename__ = "mobile_sessions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    device_id = Column(String(255), nullable=False)
+    device_type = Column(String(50))  # iOS, Android
+    app_version = Column(String(50))
+    session_token = Column(String(500), unique=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    last_activity_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    user_rel = relationship("User")
+
+
+class MobileNotification(Base):
+    """Push notifications for mobile"""
+    __tablename__ = "mobile_notifications"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    title = Column(String(255), nullable=False)
+    message = Column(Text)
+    notification_type = Column(String(50))
+    is_read = Column(Boolean, default=False)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    read_at = Column(DateTime, nullable=True)
+    user_rel = relationship("User")
+
+
+# ============================================================================
+# SPRINT 14: PERFORMANCE OPTIMIZATION MODELS
+# ============================================================================
+
+class CacheEntry(Base):
+    """Cache management for performance"""
+    __tablename__ = "cache_entries"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    cache_key = Column(String(500), unique=True, nullable=False)
+    cache_value = Column(JSON)
+    expires_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+
+class PerformanceMetric(Base):
+    """System performance metrics"""
+    __tablename__ = "performance_metrics"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    metric_name = Column(String(255), nullable=False)
+    metric_value = Column(Numeric(18, 6))
+    metric_unit = Column(String(50))
+    recorded_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    tenant_relation = relationship("Tenant")
+
+
+# ============================================================================
+# SPRINT 15: PRODUCTION HARDENING MODELS
+# ============================================================================
+
+class SystemConfig(Base):
+    """System configuration and feature flags"""
+    __tablename__ = "system_config"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    config_key = Column(String(255), unique=True, nullable=False)
+    config_value = Column(String(1000))
+    is_feature_flag = Column(Boolean, default=False)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class BackupLog(Base):
+    """Database backup logging"""
+    __tablename__ = "backup_logs"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    backup_type = Column(String(50))  # full, incremental, snapshot
+    backup_location = Column(String(500))
+    file_size_mb = Column(Integer)
+    backup_status = Column(String(50))  # success, failed, in_progress
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    completed_at = Column(DateTime, nullable=True)
+    tenant_relation = relationship("Tenant")
+
+
+class SecurityLog(Base):
+    """Security and compliance logging"""
+    __tablename__ = "security_logs"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    event_type = Column(String(100))  # login, logout, permission_change, failed_auth
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"))
+    ip_address = Column(String(45))
+    severity = Column(String(20))  # low, medium, high, critical
+    event_details = Column(JSON)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    tenant_relation = relationship("Tenant")
+    user_relation = relationship("User")
