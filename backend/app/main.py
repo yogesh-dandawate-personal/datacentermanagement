@@ -28,6 +28,7 @@ from app.routes.dashboards import router as dashboards_router
 from app.routes.carbon import router as carbon_router
 from app.routes.kpi import router as kpi_router
 from app.routes.marketplace import router as marketplace_router
+from app.routes.reporting import router as reporting_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -58,6 +59,7 @@ app.include_router(dashboards_router)
 app.include_router(carbon_router)
 app.include_router(kpi_router)
 app.include_router(marketplace_router)
+app.include_router(reporting_router)
 
 # Global exception handler
 @app.exception_handler(NetZeroException)

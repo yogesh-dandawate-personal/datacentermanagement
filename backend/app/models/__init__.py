@@ -891,3 +891,156 @@ class MarketplaceAnalytics(Base):
 
     # Relationships
     tenant = relationship("Tenant")
+
+
+# ============================================================================
+# SPRINT 9: REPORTING & COMPLIANCE MODELS
+# ============================================================================
+
+class ComplianceReport(Base):
+    """Regulatory compliance report (GHG Protocol, TCFD, SEC)"""
+    __tablename__ = "compliance_reports"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    report_type = Column(String(50), nullable=False, index=True)  # ghg_protocol, tcfd, sec_climate, custom
+    reporting_period = Column(String(50), nullable=False)  # Q1, Q2, Q3, Q4, annual
+    fiscal_year = Column(Integer, nullable=False, index=True)
+
+    status = Column(String(50), default="draft", index=True)  # draft, pending_review, approved, submitted, published
+
+    scope_1_emissions = Column(Numeric(18, 6))  # Metric tonnes CO2e
+    scope_2_emissions = Column(Numeric(18, 6))  # Metric tonnes CO2e
+    scope_3_emissions = Column(Numeric(18, 6))  # Metric tonnes CO2e
+    carbon_offset_credits_used = Column(Numeric(18, 6), default=0)
+
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    submitted_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    approved_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    submitted_at = Column(DateTime, nullable=True)
+    approved_at = Column(DateTime, nullable=True)
+    expiration_date = Column(DateTime, nullable=True)
+
+    # Relationships
+    organization = relationship("Organization")
+    tenant = relationship("Tenant")
+    creator = relationship("User", foreign_keys=[created_by])
+    submitter = relationship("User", foreign_keys=[submitted_by])
+    approver = relationship("User", foreign_keys=[approved_by])
+    sections = relationship("ReportSection", back_populates="report", cascade="all, delete-orphan")
+
+
+class ReportSection(Base):
+    """Individual sections within a compliance report"""
+    __tablename__ = "report_sections"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    report_id = Column(UUID(as_uuid=True), ForeignKey("compliance_reports.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    section_name = Column(String(255), nullable=False)  # executive_summary, methodology, results, targets, etc.
+    content = Column(JSON, default=dict)  # Formatted content with text, tables, etc.
+    completion_percentage = Column(Integer, default=0)  # 0-100
+
+    requires_review = Column(Boolean, default=False)
+    reviewed_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    reviewed_at = Column(DateTime, nullable=True)
+    review_notes = Column(Text, nullable=True)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    report = relationship("ComplianceReport", back_populates="sections")
+    reviewer = relationship("User", foreign_keys=[reviewed_by])
+
+
+class ComplianceAuditTrail(Base):
+    """Detailed audit trail of all compliance-related changes"""
+    __tablename__ = "compliance_audit_trails"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    action = Column(String(50), nullable=False, index=True)  # CREATE, UPDATE, DELETE, RETIRE, TRADE, APPROVE, SUBMIT
+    action_category = Column(String(50), nullable=False, index=True)  # report, credit, target, etc.
+    entity_type = Column(String(100), nullable=False, index=True)  # carbon_calculation, credit_batch, report, etc.
+    entity_id = Column(UUID(as_uuid=True), index=True)
+
+    changed_values = Column(JSON, default=dict)  # Before/after values
+
+    changed_by_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    ip_address = Column(String(45))
+    user_agent = Column(String(500))
+
+    timestamp = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+
+    # Relationships
+    organization = relationship("Organization")
+    tenant = relationship("Tenant")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_user_id])
+
+
+class ComplianceTarget(Base):
+    """Emissions reduction targets and goals"""
+    __tablename__ = "compliance_targets"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    target_name = Column(String(255), nullable=False, index=True)  # science-based target, net-zero 2030, etc.
+    target_type = Column(String(50), nullable=False)  # absolute_reduction, intensity_reduction, net_zero
+    description = Column(Text)
+
+    baseline_year = Column(Integer, nullable=False)
+    baseline_value = Column(Numeric(18, 6), nullable=False)  # Metric tonnes CO2e
+
+    target_year = Column(Integer, nullable=False, index=True)
+    target_value = Column(Numeric(18, 6), nullable=False)  # Metric tonnes CO2e
+
+    status = Column(String(50), default="on_track", index=True)  # on_track, at_risk, failed
+    progress_percentage = Column(Integer, default=0)  # 0-100
+
+    verification_status = Column(String(50))  # unverified, verified, approved
+    verified_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    verified_at = Column(DateTime, nullable=True)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    organization = relationship("Organization")
+    tenant = relationship("Tenant")
+    verifier = relationship("User", foreign_keys=[verified_by])
+
+
+class ReportingBenchmark(Base):
+    """Industry and regional benchmarks for comparison"""
+    __tablename__ = "reporting_benchmarks"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    benchmark_name = Column(String(255), nullable=False, index=True)  # industry_average, regional_average, best_in_class
+    metric_name = Column(String(100), nullable=False, index=True)  # pue, cue, wue, ere, carbon_intensity
+    benchmark_category = Column(String(100), nullable=False)  # data_center, facility, organization, etc.
+
+    benchmark_value = Column(Numeric(18, 6), nullable=False)
+    benchmark_unit = Column(String(50))  # percentage, ratio, g/kWh, etc.
+
+    organization_percentile_rank = Column(Integer)  # 0-100, where organization ranks
+    organization_value = Column(Numeric(18, 6))  # Current organization value for comparison
+
+    industry = Column(String(100))  # Optional: specific industry segment
+    region = Column(String(100))  # Optional: geographic region
+    data_year = Column(Integer)
+
+    last_updated = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    # Relationships
+    tenant = relationship("Tenant")
