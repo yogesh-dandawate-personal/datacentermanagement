@@ -3,6 +3,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
+from decimal import Decimal
 import uuid
 
 Base = declarative_base()
@@ -729,3 +730,164 @@ class KPIThresholdBreach(Base):
     threshold = relationship("KPIThreshold")
     kpi = relationship("KPIDefinition")
     snapshot = relationship("KPISnapshot")
+
+
+# Marketplace models for Sprint 8
+class CarbonCredit(Base):
+    """Carbon credits generated from emissions reductions"""
+    __tablename__ = "carbon_credits"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    batch_id = Column(UUID(as_uuid=True), ForeignKey("credit_batches.id", ondelete="SET NULL"), nullable=True, index=True)
+
+    credit_type = Column(String(50), nullable=False)  # verified, unverified, retirement
+    vintage_year = Column(Integer, nullable=False, index=True)  # Year credit was generated
+
+    quantity = Column(Numeric(18, 6), nullable=False)  # Number of credits (metric tons CO2e)
+    unit = Column(String(50), default="metric_tons_co2e")
+
+    creation_date = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    expiration_date = Column(DateTime, nullable=True, index=True)
+
+    status = Column(String(50), default="active", index=True)  # active, traded, retired, expired
+    source_calculation_id = Column(UUID(as_uuid=True), ForeignKey("carbon_calculations.id", ondelete="SET NULL"), nullable=True)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    tenant = relationship("Tenant")
+    organization = relationship("Organization")
+    source_calculation = relationship("CarbonCalculation")
+    batch = relationship("CreditBatch", back_populates="credits")
+
+
+class CreditBatch(Base):
+    """Batch of carbon credits ready for trading"""
+    __tablename__ = "credit_batches"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    batch_name = Column(String(255), nullable=False, index=True)
+    description = Column(Text)
+
+    total_credits = Column(Numeric(18, 6), nullable=False)  # Sum of credits in batch
+    quality_score = Column(Numeric(5, 2), default=Decimal("100"))  # 0-100 based on data quality
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    organization = relationship("Organization")
+    tenant = relationship("Tenant")
+    credits = relationship("CarbonCredit", back_populates="batch")
+    listings = relationship("MarketplaceListing", back_populates="batch", cascade="all, delete-orphan")
+
+
+class MarketplaceListing(Base):
+    """Listing of carbon credits on marketplace"""
+    __tablename__ = "marketplace_listings"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    seller_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    batch_id = Column(UUID(as_uuid=True), ForeignKey("credit_batches.id", ondelete="CASCADE"), nullable=False, index=True)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    quantity_available = Column(Numeric(18, 6), nullable=False)
+    price_per_credit = Column(Numeric(12, 2), nullable=False)  # USD
+
+    listing_type = Column(String(50), nullable=False)  # fixed_price, auction, negotiable
+    status = Column(String(50), default="active", index=True)  # active, sold, cancelled
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    expires_at = Column(DateTime, nullable=True, index=True)
+
+    minimum_bid = Column(Numeric(12, 2))  # For auction listings
+
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    seller = relationship("Organization", foreign_keys=[seller_id])
+    batch = relationship("CreditBatch", back_populates="listings")
+    tenant = relationship("Tenant")
+    trades = relationship("Trade", back_populates="listing", cascade="all, delete-orphan")
+
+
+class Trade(Base):
+    """Carbon credit trade transaction"""
+    __tablename__ = "trades"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    listing_id = Column(UUID(as_uuid=True), ForeignKey("marketplace_listings.id", ondelete="CASCADE"), nullable=False, index=True)
+    buyer_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    seller_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    quantity = Column(Numeric(18, 6), nullable=False)
+    price_per_credit = Column(Numeric(12, 2), nullable=False)  # Final price agreed
+    total_price = Column(Numeric(18, 2), nullable=False)  # quantity * price_per_credit
+
+    status = Column(String(50), default="pending", index=True)  # pending, completed, cancelled
+    payment_status = Column(String(50), default="pending", index=True)  # pending, completed, failed
+
+    trade_date = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    completion_date = Column(DateTime, nullable=True)
+
+    trade_notes = Column(Text)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    listing = relationship("MarketplaceListing", back_populates="trades")
+    buyer = relationship("Organization", foreign_keys=[buyer_id])
+    seller_org = relationship("Organization", foreign_keys=[seller_id])
+    tenant = relationship("Tenant")
+
+
+class CreditRetirement(Base):
+    """Record of carbon credits being retired (used)"""
+    __tablename__ = "credit_retirements"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    retired_credits = Column(Numeric(18, 6), nullable=False)  # Quantity retired
+    retirement_date = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    retirement_reason = Column(String(500))  # Compliance requirement, offset project, etc.
+
+    registry_reference = Column(String(255))  # Reference to external registry if applicable
+    audit_notes = Column(Text)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    organization = relationship("Organization")
+    tenant = relationship("Tenant")
+
+
+class MarketplaceAnalytics(Base):
+    """Analytics and pricing data for marketplace"""
+    __tablename__ = "marketplace_analytics"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    metric_date = Column(DateTime, nullable=False, index=True)
+    metric_name = Column(String(100), nullable=False, index=True)  # avg_price, volume, trades_count, etc.
+
+    metric_value = Column(Numeric(18, 6), nullable=False)
+
+    # Store trending data as JSON for price history, volume trends, etc.
+    trend_data = Column(JSON, default=dict)  # Historical values for charting
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    # Relationships
+    tenant = relationship("Tenant")
