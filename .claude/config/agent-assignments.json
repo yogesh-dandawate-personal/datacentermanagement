@@ -1,0 +1,344 @@
+{
+  "version": "1.0",
+  "sprints": {
+    "sprint_1_auth_tenant": {
+      "name": "Auth & Tenant Setup",
+      "duration_weeks": 2,
+      "story_points": 72,
+      "frontend_first": true,
+      "agents": [
+        "Backend_FastAPI_01",
+        "Backend_Security_01",
+        "Backend_Database_01",
+        "Frontend_React_01",
+        "QA_Unit_01",
+        "QA_Integration_01",
+        "DevOps_CICD_01"
+      ],
+      "stories": [
+        "ICARBON-2001",
+        "ICARBON-2002",
+        "ICARBON-2003"
+      ],
+      "dependencies": [],
+      "mock_apis": []
+    },
+    "sprint_2_org_hierarchy": {
+      "name": "Organization Hierarchy",
+      "duration_weeks": 2,
+      "story_points": 84,
+      "frontend_first": true,
+      "agents": [
+        "Backend_FastAPI_01",
+        "Backend_FastAPI_02",
+        "Backend_Database_01",
+        "Frontend_React_01",
+        "Frontend_React_02",
+        "QA_Unit_01",
+        "QA_Integration_01",
+        "QA_E2E_01"
+      ],
+      "stories": [
+        "ICARBON-2004",
+        "ICARBON-2005",
+        "ICARBON-2006"
+      ],
+      "dependencies": [
+        "sprint_1_auth_tenant"
+      ],
+      "mock_apis": [
+        "org_crud",
+        "facility_hierarchy"
+      ]
+    },
+    "sprint_3_facility_mgmt": {
+      "name": "Facility Management",
+      "duration_weeks": 2,
+      "story_points": 72,
+      "frontend_first": true,
+      "agents": [
+        "Backend_FastAPI_01",
+        "Backend_FastAPI_02",
+        "Backend_Database_01",
+        "Frontend_React_01",
+        "Frontend_UX_01",
+        "QA_Unit_01",
+        "QA_Integration_01"
+      ],
+      "stories": [
+        "ICARBON-2007",
+        "ICARBON-2008"
+      ],
+      "dependencies": [
+        "sprint_2_org_hierarchy"
+      ],
+      "mock_apis": [
+        "facility_crud",
+        "facility_search"
+      ]
+    },
+    "sprint_4_data_ingestion": {
+      "name": "Data Ingestion Pipeline",
+      "duration_weeks": 2,
+      "story_points": 96,
+      "frontend_first": false,
+      "agents": [
+        "Backend_FastAPI_01",
+        "Backend_Database_01",
+        "Backend_Queue_01",
+        "Backend_Search_01",
+        "QA_Integration_01",
+        "QA_Performance_01"
+      ],
+      "stories": [
+        "ICARBON-2009",
+        "ICARBON-2010",
+        "ICARBON-2011"
+      ],
+      "dependencies": [
+        "sprint_3_facility_mgmt"
+      ],
+      "mock_apis": []
+    },
+    "sprint_5_energy_dashboards": {
+      "name": "Energy Dashboards",
+      "duration_weeks": 2,
+      "story_points": 84,
+      "frontend_first": true,
+      "agents": [
+        "Backend_FastAPI_01",
+        "Backend_Cache_01",
+        "Frontend_React_01",
+        "Frontend_React_02",
+        "Frontend_Performance_01",
+        "QA_E2E_01"
+      ],
+      "stories": [
+        "ICARBON-2012",
+        "ICARBON-2013"
+      ],
+      "dependencies": [
+        "sprint_4_data_ingestion"
+      ],
+      "mock_apis": [
+        "energy_metrics",
+        "consumption_data",
+        "trend_analysis"
+      ]
+    },
+    "sprint_6_emissions_analytics": {
+      "name": "Emissions Analytics",
+      "duration_weeks": 2,
+      "story_points": 96,
+      "frontend_first": true,
+      "agents": [
+        "Backend_FastAPI_01",
+        "Backend_FastAPI_02",
+        "Backend_Cache_01",
+        "Frontend_React_01",
+        "Frontend_React_02",
+        "Frontend_UX_01",
+        "QA_E2E_01",
+        "QA_Performance_01"
+      ],
+      "stories": [
+        "ICARBON-2014",
+        "ICARBON-2015",
+        "ICARBON-2016"
+      ],
+      "dependencies": [
+        "sprint_5_energy_dashboards"
+      ],
+      "mock_apis": [
+        "emissions_calculation",
+        "scope_analysis",
+        "reduction_targets"
+      ]
+    },
+    "sprint_7_carbon_credits": {
+      "name": "Carbon Credits",
+      "duration_weeks": 2,
+      "story_points": 108,
+      "frontend_first": true,
+      "agents": [
+        "Backend_FastAPI_01",
+        "Backend_FastAPI_02",
+        "Backend_Database_01",
+        "Backend_Cache_01",
+        "Frontend_React_01",
+        "Frontend_React_02",
+        "QA_Unit_01",
+        "QA_Integration_01",
+        "QA_E2E_01"
+      ],
+      "stories": [
+        "ICARBON-2017",
+        "ICARBON-2018",
+        "ICARBON-2019"
+      ],
+      "dependencies": [
+        "sprint_6_emissions_analytics"
+      ],
+      "mock_apis": [
+        "credit_issuance",
+        "credit_transfer",
+        "credit_verification"
+      ]
+    },
+    "sprint_8_marketplace": {
+      "name": "Marketplace",
+      "duration_weeks": 2,
+      "story_points": 120,
+      "frontend_first": true,
+      "agents": [
+        "Backend_FastAPI_01",
+        "Backend_FastAPI_02",
+        "Backend_Database_01",
+        "Backend_Queue_01",
+        "Frontend_React_01",
+        "Frontend_React_02",
+        "Frontend_Performance_01",
+        "QA_E2E_01",
+        "QA_Performance_01",
+        "QA_Security_01"
+      ],
+      "stories": [
+        "ICARBON-2020",
+        "ICARBON-2021",
+        "ICARBON-2022",
+        "ICARBON-2023"
+      ],
+      "dependencies": [
+        "sprint_7_carbon_credits"
+      ],
+      "mock_apis": [
+        "marketplace_listings",
+        "order_management",
+        "payment_processing"
+      ]
+    },
+    "sprint_9_reporting_compliance": {
+      "name": "Reporting & Compliance",
+      "duration_weeks": 2,
+      "story_points": 84,
+      "frontend_first": false,
+      "agents": [
+        "Backend_FastAPI_01",
+        "Backend_Database_01",
+        "Backend_Search_01",
+        "Frontend_React_01",
+        "QA_Integration_01",
+        "QA_Security_01",
+        "Support_Documentation_01"
+      ],
+      "stories": [
+        "ICARBON-2024",
+        "ICARBON-2025"
+      ],
+      "dependencies": [
+        "sprint_8_marketplace"
+      ],
+      "mock_apis": []
+    },
+    "sprint_10_api_integrations": {
+      "name": "API Integrations",
+      "duration_weeks": 2,
+      "story_points": 72,
+      "frontend_first": false,
+      "agents": [
+        "Backend_FastAPI_01",
+        "Backend_FastAPI_02",
+        "Support_Integration_01",
+        "QA_Integration_01",
+        "QA_Performance_01",
+        "DevOps_Infrastructure_01"
+      ],
+      "stories": [
+        "ICARBON-2026",
+        "ICARBON-2027"
+      ],
+      "dependencies": [
+        "sprint_9_reporting_compliance"
+      ],
+      "mock_apis": []
+    },
+    "sprint_11_mobile_app": {
+      "name": "Mobile App",
+      "duration_weeks": 2,
+      "story_points": 96,
+      "frontend_first": true,
+      "agents": [
+        "Frontend_React_01",
+        "Frontend_React_02",
+        "Frontend_Performance_01",
+        "Frontend_UX_01",
+        "Backend_FastAPI_01",
+        "QA_E2E_01",
+        "QA_Performance_01"
+      ],
+      "stories": [
+        "ICARBON-2028",
+        "ICARBON-2029",
+        "ICARBON-2030"
+      ],
+      "dependencies": [
+        "sprint_10_api_integrations"
+      ],
+      "mock_apis": []
+    },
+    "sprint_12_performance_scale": {
+      "name": "Performance & Scale",
+      "duration_weeks": 2,
+      "story_points": 108,
+      "frontend_first": false,
+      "agents": [
+        "Backend_FastAPI_01",
+        "Backend_FastAPI_02",
+        "Backend_Cache_01",
+        "Backend_Queue_01",
+        "DevOps_Infrastructure_01",
+        "DevOps_Monitoring_01",
+        "QA_Performance_01",
+        "Architecture_Analysis_01"
+      ],
+      "stories": [
+        "ICARBON-2031",
+        "ICARBON-2032",
+        "ICARBON-2033"
+      ],
+      "dependencies": [
+        "sprint_11_mobile_app"
+      ],
+      "mock_apis": []
+    },
+    "sprint_13_deployment_launch": {
+      "name": "Deployment & Launch",
+      "duration_weeks": 2,
+      "story_points": 60,
+      "frontend_first": false,
+      "agents": [
+        "DevOps_CICD_01",
+        "DevOps_Infrastructure_01",
+        "DevOps_Monitoring_01",
+        "Governance_Architect_01",
+        "Governance_Compliance_01",
+        "Support_Documentation_01"
+      ],
+      "stories": [
+        "ICARBON-2034",
+        "ICARBON-2035"
+      ],
+      "dependencies": [
+        "sprint_12_performance_scale"
+      ],
+      "mock_apis": []
+    }
+  },
+  "orchestration_rules": {
+    "parallel_sprint_limit": 2,
+    "allow_dependency_skip": false,
+    "auto_escalate_blockers": true,
+    "frontend_first_enabled": true,
+    "continuous_deployment": true
+  }
+}

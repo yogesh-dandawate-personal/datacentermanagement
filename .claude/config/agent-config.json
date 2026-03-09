@@ -1,0 +1,120 @@
+{
+  "version": "1.0",
+  "created_at": "2026-03-09T00:00:00Z",
+  "total_agents": 26,
+  "agent_categories": {
+    "governance": {
+      "count": 4,
+      "agents": [
+        "Governance_Architect_01",
+        "Governance_Enforcer_01",
+        "Governance_Compliance_01",
+        "Governance_Security_01"
+      ]
+    },
+    "backend": {
+      "count": 6,
+      "agents": [
+        "Backend_FastAPI_01",
+        "Backend_FastAPI_02",
+        "Backend_Database_01",
+        "Backend_Cache_01",
+        "Backend_Queue_01",
+        "Backend_Search_01"
+      ]
+    },
+    "frontend": {
+      "count": 4,
+      "agents": [
+        "Frontend_React_01",
+        "Frontend_React_02",
+        "Frontend_UX_01",
+        "Frontend_Performance_01"
+      ]
+    },
+    "qa": {
+      "count": 5,
+      "agents": [
+        "QA_Unit_01",
+        "QA_Integration_01",
+        "QA_E2E_01",
+        "QA_Performance_01",
+        "QA_Security_01"
+      ]
+    },
+    "devops": {
+      "count": 3,
+      "agents": [
+        "DevOps_CICD_01",
+        "DevOps_Infrastructure_01",
+        "DevOps_Monitoring_01"
+      ]
+    },
+    "architecture": {
+      "count": 2,
+      "agents": [
+        "Architecture_Design_01",
+        "Architecture_Analysis_01"
+      ]
+    },
+    "support": {
+      "count": 2,
+      "agents": [
+        "Support_Documentation_01",
+        "Support_Integration_01"
+      ]
+    }
+  },
+  "default_settings": {
+    "max_parallel_tasks": 2,
+    "task_timeout_hours": 8,
+    "heartbeat_interval_seconds": 60,
+    "checkpoint_interval_seconds": 300,
+    "retry_attempts": 3,
+    "escalation_timeout_minutes": 30
+  },
+  "ralph_loop_settings": {
+    "phases": [
+      "R0_RECEIVE",
+      "R1_UNDERSTAND",
+      "R2_RED",
+      "R3_GREEN",
+      "R4_REFACTOR",
+      "R5_CREATE_PR",
+      "R6_MERGE",
+      "R7_COMPLETE"
+    ],
+    "phase_timeouts_minutes": {
+      "R0": 5,
+      "R1": 10,
+      "R2": 30,
+      "R3": 60,
+      "R4": 45,
+      "R5": 15,
+      "R6": 10,
+      "R7": 5
+    }
+  },
+  "parallel_tdd_settings": {
+    "pipelines": [
+      "development",
+      "testing",
+      "deployment",
+      "validation"
+    ],
+    "pipeline_timeouts_minutes": {
+      "development": 120,
+      "testing": 120,
+      "deployment": 60,
+      "validation": 60
+    },
+    "required_coverage_percent": 85,
+    "required_test_pass_rate_percent": 95
+  },
+  "monitoring": {
+    "utilization_target_percent": 85,
+    "alert_on_idle_minutes": 15,
+    "alert_on_failure_count": 3,
+    "metrics_collection_interval_seconds": 60
+  }
+}

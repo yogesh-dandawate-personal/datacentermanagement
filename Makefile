@@ -242,6 +242,62 @@ status:
 	@echo "$(CYAN)Git Status:$(NC)"
 	@git status --short || echo "Not a git repository"
 
+# Agent orchestration
+agent-start:
+	@python scripts/agent-orchestrator.py --daemon
+
+agent-stop:
+	@pkill -f agent-orchestrator.py
+
+orchestrator-start:
+	@python scripts/agent-orchestrator.py --mode daemon &
+	@python scripts/progress-reporter.py --watch &
+	@echo "$(GREEN)✓ Orchestrator started (detached)$(NC)"
+	@echo "  View progress: make progress-watch"
+
+orchestrator-stop:
+	@pkill -f agent-orchestrator.py || true
+	@pkill -f progress-reporter.py || true
+	@echo "$(GREEN)✓ Orchestrator stopped$(NC)"
+
+# Progress reporting
+progress-report:
+	@python scripts/progress-reporter.py
+
+progress-watch:
+	@python scripts/progress-reporter.py --watch
+
+daily-standup:
+	@python scripts/daily-standup-generator.py --date $(DATE)
+
+standup-save:
+	@python scripts/progress-reporter.py --save-standup
+
+# Checkpoint management
+checkpoint-create:
+	@python scripts/checkpoint-manager.py create $(SESSION) $(AGENT) $(PHASE)
+
+checkpoint-restore:
+	@python scripts/checkpoint-manager.py restore $(SESSION) $(AGENT) $(CHECKPOINT)
+
+checkpoint-list:
+	@python scripts/checkpoint-manager.py list $(SESSION) $(AGENT)
+
+# Agent status
+agent-status:
+	@python scripts/agent-orchestrator.py --status $(AGENT)
+
+agent-sessions:
+	@tmux list-sessions 2>/dev/null | grep agent- || echo "No active agent sessions"
+
+# Parallel TDD
+parallel-tdd:
+	@python scripts/parallel-tdd-orchestrator.py $(STORY)
+
+# Ralph Loop execution
+ralph-loop:
+	@python scripts/ralph-loop-executor.py $(STORY) $(AGENT)
+
 # Help commands
 docs:
 	@echo "Opening documentation..."
@@ -271,5 +327,15 @@ stop:
 restart: stop start
 
 reset: clean install setup seed
+
+# Autonomous development
+autonomous-start: docker-up orchestrator-start
+	@echo "$(GREEN)✓ Autonomous development system started$(NC)"
+	@echo "  Dashboard: make progress-watch"
+	@echo "  Agent status: make agent-status"
+	@echo "  Daily standup: make daily-standup"
+
+autonomous-stop: orchestrator-stop docker-down
+	@echo "$(GREEN)✓ Autonomous development system stopped$(NC)"
 
 .DEFAULT_GOAL := help
