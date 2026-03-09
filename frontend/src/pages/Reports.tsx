@@ -1,7 +1,7 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '../components/ui/Card'
-import { Button } from '../components/ui/Button'
-import { FileText, Download, Eye } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, Table, Pagination, Select } from '../components/ui'
+import { FileText, Download, Eye, Trash2, Filter, Search } from 'lucide-react'
+import { useState } from 'react'
 
 const complianceData = [
   { month: 'Jan', scope1: 450, scope2: 380, scope3: 520 },
@@ -12,47 +12,102 @@ const complianceData = [
   { month: 'Jun', scope1: 350, scope2: 280, scope3: 420 },
 ]
 
-const reportsList = [
+const allReports = [
   {
-    name: 'Q1 2026 ESG Report',
-    date: 'March 15, 2026',
+    id: 1,
+    name: 'Q2 2026 ESG Report',
+    date: 'June 15, 2026',
     status: 'Complete',
     size: '2.4 MB',
     compliance: 'ISO 14001',
+    type: 'ESG'
   },
   {
+    id: 2,
+    name: 'Q1 2026 ESG Report',
+    date: 'March 15, 2026',
+    status: 'Complete',
+    size: '2.3 MB',
+    compliance: 'ISO 14001',
+    type: 'ESG'
+  },
+  {
+    id: 3,
     name: 'Carbon Reduction Plan',
     date: 'March 10, 2026',
     status: 'Pending Review',
     size: '1.8 MB',
     compliance: 'GHG Protocol',
+    type: 'Compliance'
   },
   {
+    id: 4,
     name: 'Sustainability Goals Update',
     date: 'March 5, 2026',
     status: 'Complete',
     size: '3.2 MB',
     compliance: 'SASB',
+    type: 'Strategic'
   },
   {
+    id: 5,
     name: 'Monthly Energy Audit',
     date: 'February 28, 2026',
     status: 'Complete',
     size: '1.5 MB',
     compliance: 'ISO 50001',
+    type: 'Audit'
+  },
+  {
+    id: 6,
+    name: 'Scope 3 Emissions Analysis',
+    date: 'February 20, 2026',
+    status: 'Complete',
+    size: '2.1 MB',
+    compliance: 'GHG Protocol',
+    type: 'Analysis'
   },
 ]
 
+const auditTrail = [
+  { id: 1, action: 'Report Q2 2026 generated', user: 'admin@company.com', time: '2 hours ago', type: 'generated' },
+  { id: 2, action: 'Emissions data verified', user: 'auditor@company.com', time: '4 hours ago', type: 'verified' },
+  { id: 3, action: 'Report approved for publication', user: 'manager@company.com', time: '1 day ago', type: 'approved' },
+  { id: 4, action: 'Data import completed', user: 'system', time: '2 days ago', type: 'imported' },
+  { id: 5, action: 'Baseline established', user: 'analyst@company.com', time: '1 week ago', type: 'created' },
+]
+
 export function Reports() {
+  const [currentPage, setCurrentPage] = useState(1)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterType, setFilterType] = useState('all')
+  const [filterStatus, setFilterStatus] = useState('all')
+
+  const itemsPerPage = 5
+
+  // Filter reports
+  let filteredReports = allReports.filter(report => {
+    const matchesSearch = report.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesType = filterType === 'all' || report.type === filterType
+    const matchesStatus = filterStatus === 'all' || report.status === filterStatus
+    return matchesSearch && matchesType && matchesStatus
+  })
+
+  const totalPages = Math.ceil(filteredReports.length / itemsPerPage)
+  const paginatedReports = filteredReports.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">Reports & Compliance</h1>
           <p className="text-slate-400">Generate and manage ESG compliance reports</p>
         </div>
-        <Button size="lg" className="flex items-center gap-2">
+        <Button variant="primary" size="lg" className="flex items-center gap-2">
           <FileText className="w-5 h-5" />
           New Report
         </Button>
@@ -64,7 +119,7 @@ export function Reports() {
           <CardContent className="pt-6">
             <p className="text-slate-400 text-sm">Total Emissions (6M)</p>
             <p className="text-3xl font-bold text-white mt-2">2,350 tCO₂e</p>
-            <p className="text-sm text-red-400 mt-1">↓ 12% vs previous period</p>
+            <p className="text-sm text-success-400 mt-1">↓ 12% vs previous period</p>
           </CardContent>
         </Card>
 
@@ -72,7 +127,7 @@ export function Reports() {
           <CardContent className="pt-6">
             <p className="text-slate-400 text-sm">Compliance Rate</p>
             <p className="text-3xl font-bold text-white mt-2">94.5%</p>
-            <p className="text-sm text-green-400 mt-1">↑ 2.3% from last month</p>
+            <p className="text-sm text-success-400 mt-1">↑ 2.3% from last month</p>
           </CardContent>
         </Card>
 
@@ -85,7 +140,7 @@ export function Reports() {
         </Card>
       </div>
 
-      {/* Emissions Trend */}
+      {/* Emissions Trend Chart */}
       <Card>
         <CardHeader>
           <CardTitle>Scope 1, 2, 3 Emissions Trend</CardTitle>
@@ -108,61 +163,135 @@ export function Reports() {
               <Legend />
               <Bar dataKey="scope1" stackId="a" fill="#ef4444" name="Scope 1" />
               <Bar dataKey="scope2" stackId="a" fill="#f59e0b" name="Scope 2" />
-              <Bar dataKey="scope3" stackId="a" fill="#3b82f6" name="Scope 3" />
+              <Bar dataKey="scope3" stackId="a" fill="#0ea5e9" name="Scope 3" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
-      {/* Recent Reports */}
+      {/* Reports List with Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Reports</CardTitle>
-          <CardDescription>Access and download your compliance documents</CardDescription>
+          <CardTitle>Reports & Documents</CardTitle>
+          <CardDescription>Access and manage your compliance documents</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {reportsList.map((report, i) => (
-              <div
-                key={i}
-                className="p-4 border border-slate-700/30 rounded-lg hover:border-blue-500/50 transition flex items-center justify-between"
-              >
-                <div className="flex-1">
-                  <h4 className="font-medium text-white flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-blue-400" />
-                    {report.name}
-                  </h4>
-                  <div className="flex items-center gap-4 mt-2 text-sm text-slate-400">
-                    <span>{report.date}</span>
-                    <span>•</span>
-                    <span>{report.size}</span>
-                    <span>•</span>
-                    <span className="px-2 py-1 bg-slate-900/50 rounded text-xs text-slate-300">
-                      {report.compliance}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`text-xs px-2 py-1 rounded ${
-                      report.status === 'Complete'
-                        ? 'bg-green-900/30 text-green-300'
-                        : 'bg-yellow-900/30 text-yellow-300'
-                    }`}
-                  >
-                    {report.status}
-                  </span>
-                  <Button variant="ghost" size="sm" className="flex items-center gap-1">
-                    <Eye className="w-4 h-4" />
-                    View
-                  </Button>
-                  <Button variant="ghost" size="sm" className="flex items-center gap-1">
-                    <Download className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+        <CardContent className="space-y-6">
+          {/* Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <input
+                type="text"
+                placeholder="Search reports..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value)
+                  setCurrentPage(1)
+                }}
+                className="w-full pl-10 pr-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-white placeholder-slate-500 focus:border-primary-500/50 focus:outline-none transition"
+              />
+            </div>
+
+            <Select
+              options={[
+                { value: 'all', label: 'All Types' },
+                { value: 'ESG', label: 'ESG Reports' },
+                { value: 'Compliance', label: 'Compliance' },
+                { value: 'Audit', label: 'Audits' },
+                { value: 'Strategic', label: 'Strategic' },
+                { value: 'Analysis', label: 'Analysis' },
+              ]}
+              value={filterType}
+              onChange={(e) => {
+                setFilterType(e.target.value)
+                setCurrentPage(1)
+              }}
+            />
+
+            <Select
+              options={[
+                { value: 'all', label: 'All Status' },
+                { value: 'Complete', label: 'Complete' },
+                { value: 'Pending Review', label: 'Pending Review' },
+              ]}
+              value={filterStatus}
+              onChange={(e) => {
+                setFilterStatus(e.target.value)
+                setCurrentPage(1)
+              }}
+            />
           </div>
+
+          {/* Reports Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-slate-800/50 border-b border-slate-700/30">
+                  <th className="px-6 py-4 text-left font-semibold text-slate-200">Name</th>
+                  <th className="px-6 py-4 text-left font-semibold text-slate-200">Date</th>
+                  <th className="px-6 py-4 text-left font-semibold text-slate-200">Type</th>
+                  <th className="px-6 py-4 text-left font-semibold text-slate-200">Status</th>
+                  <th className="px-6 py-4 text-left font-semibold text-slate-200">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedReports.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-8 text-center text-slate-400">
+                      No reports found matching your filters
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedReports.map((report) => (
+                    <tr key={report.id} className="border-b border-slate-700/30 hover:bg-slate-800/30 transition">
+                      <td className="px-6 py-4 text-slate-300">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-primary-400" />
+                          <div>
+                            <p className="font-medium text-white">{report.name}</p>
+                            <p className="text-xs text-slate-400">{report.size}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-slate-300">{report.date}</td>
+                      <td className="px-6 py-4">
+                        <Badge variant="info" size="sm">{report.type}</Badge>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Badge
+                          variant={report.status === 'Complete' ? 'success' : 'warning'}
+                          size="sm"
+                        >
+                          {report.status}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="sm" className="flex items-center gap-1" title="View">
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" className="flex items-center gap-1" title="Download">
+                            <Download className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-6">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -173,16 +302,16 @@ export function Reports() {
           <CardDescription>Track all changes and compliance events</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3 max-h-64 overflow-y-auto">
-            {[
-              { action: 'Report Q1 2026 generated', user: 'admin@company.com', time: '2h ago' },
-              { action: 'Emissions data verified', user: 'auditor@company.com', time: '4h ago' },
-              { action: 'Report approved for publication', user: 'manager@company.com', time: '1d ago' },
-              { action: 'Data import completed', user: 'system', time: '2d ago' },
-            ].map((entry, i) => (
-              <div key={i} className="py-3 border-b border-slate-700/30 last:border-0 flex items-start gap-3">
-                <div className="w-2 h-2 rounded-full bg-blue-400 mt-2"></div>
-                <div className="flex-1">
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {auditTrail.map((entry) => (
+              <div key={entry.id} className="py-3 border-b border-slate-700/30 last:border-0 flex items-start gap-3">
+                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                  entry.type === 'generated' ? 'bg-primary-400' :
+                  entry.type === 'verified' ? 'bg-success-400' :
+                  entry.type === 'approved' ? 'bg-success-500' :
+                  'bg-slate-400'
+                }`}></div>
+                <div className="flex-1 min-w-0">
                   <p className="text-white text-sm font-medium">{entry.action}</p>
                   <p className="text-slate-400 text-xs mt-1">
                     {entry.user} • {entry.time}
