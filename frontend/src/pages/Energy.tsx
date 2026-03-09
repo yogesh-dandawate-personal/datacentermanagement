@@ -116,7 +116,7 @@ export function Energy() {
       {showFilters && (
         <Card>
           <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <Select
                 label="Facility"
                 options={[
@@ -148,7 +148,7 @@ export function Energy() {
           <Spinner size="lg" message="Loading energy metrics..." />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
@@ -189,7 +189,7 @@ export function Energy() {
       )}
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Energy Trend Chart */}
         <Card className="lg:col-span-2">
           <CardHeader>
@@ -263,7 +263,7 @@ export function Energy() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </section>
 
       {/* Facilities List */}
       <Card>

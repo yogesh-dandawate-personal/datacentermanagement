@@ -154,7 +154,7 @@ export function Reports() {
           <Spinner size="lg" message="Loading compliance metrics..." />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <Card>
             <CardContent className="pt-6">
               <p className="text-slate-400 text-sm">Total Emissions (6M)</p>
@@ -184,7 +184,7 @@ export function Reports() {
               <p className="text-sm text-slate-400 mt-1">This fiscal year</p>
             </CardContent>
           </Card>
-        </div>
+        </section>
       )}
 
       {/* Emissions Trend Chart */}

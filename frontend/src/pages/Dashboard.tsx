@@ -70,7 +70,7 @@ export function Dashboard() {
       </section>
 
       {/* Stats Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" aria-label="Key performance indicators">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6" aria-label="Key performance indicators">
         {isLoading ? (
           <>
             <SkeletonStat />
@@ -128,7 +128,7 @@ export function Dashboard() {
       </div>
 
       {/* Charts Section */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8" aria-label="Energy analytics">
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8" aria-label="Energy analytics">
         {/* Energy Consumption Chart */}
         <Card className="lg:col-span-2">
           <CardHeader>
