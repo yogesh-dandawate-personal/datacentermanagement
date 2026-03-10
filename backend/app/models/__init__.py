@@ -1390,3 +1390,113 @@ class SecurityLog(Base):
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     tenant_relation = relationship("Tenant")
     user_relation = relationship("User")
+
+
+# ============================================================================
+# SPRINT 12: EVIDENCE REPOSITORY MODELS
+# ============================================================================
+
+class Evidence(Base):
+    """Evidence documents for compliance and auditing"""
+    __tablename__ = "evidence"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    name = Column(String(255), nullable=False)
+    category = Column(String(100), nullable=False, index=True)  # policy, audit, certification, report, etc.
+    description = Column(Text)
+
+    document_key = Column(String(500), nullable=False)  # S3/MinIO object key
+    file_hash = Column(String(64), nullable=False)  # SHA256 hash for integrity verification
+    file_size_bytes = Column(Integer)  # Size of the file in bytes
+    file_type = Column(String(50))  # pdf, xlsx, png, jpg, csv, etc.
+
+    uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    uploaded_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+
+    # Soft delete support
+    deleted_at = Column(DateTime, nullable=True)
+
+    # Relationships
+    tenant = relationship("Tenant")
+    uploader = relationship("User", foreign_keys=[uploaded_by])
+    creator = relationship("User", foreign_keys=[created_by])
+    versions = relationship("EvidenceVersion", back_populates="evidence", cascade="all, delete-orphan")
+    links = relationship("EvidenceLink", back_populates="evidence", cascade="all, delete-orphan")
+
+
+class EvidenceVersion(Base):
+    """Version history for evidence documents"""
+    __tablename__ = "evidence_versions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    evidence_id = Column(UUID(as_uuid=True), ForeignKey("evidence.id", ondelete="CASCADE"), nullable=False, index=True)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    version_number = Column(Integer, nullable=False)
+    document_key = Column(String(500), nullable=False)  # S3/MinIO object key for this version
+    file_hash = Column(String(64), nullable=False)  # SHA256 hash for this version
+    file_size_bytes = Column(Integer)
+
+    change_reason = Column(String(255))  # Why this version was created
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+
+    # Relationships
+    evidence = relationship("Evidence", back_populates="versions")
+    tenant = relationship("Tenant")
+    creator = relationship("User", foreign_keys=[created_by])
+
+
+class EvidenceLink(Base):
+    """Links evidence documents to metrics, reports, or other entities"""
+    __tablename__ = "evidence_links"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    evidence_id = Column(UUID(as_uuid=True), ForeignKey("evidence.id", ondelete="CASCADE"), nullable=False, index=True)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    linked_to_type = Column(String(50), nullable=False, index=True)  # metric, report, calculation, kpi, etc.
+    linked_to_id = Column(UUID(as_uuid=True), nullable=False, index=True)  # ID of the linked entity
+
+    link_type = Column(String(50), default="supports")  # supports, references, validates, etc.
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+
+    # Relationships
+    evidence = relationship("Evidence", back_populates="links")
+    tenant = relationship("Tenant")
+    creator = relationship("User", foreign_keys=[created_by])
+
+
+# ============================================================================
+# Import Copilot and Agent models from separate modules
+# ============================================================================
+try:
+    from .copilot import (
+        CopilotQuery,
+        CopilotResponse,
+        CopilotCitation,
+        CopilotMessageHistory,
+        CopilotFeedback,
+        CopilotAccessLog,
+        CopilotRateLimit,
+    )
+except ImportError:
+    pass  # Models will be loaded by Alembic
+
+
+try:
+    from .agent import (
+        AgentRun,
+        AgentDecision,
+        AgentGuardrailViolation,
+    )
+except ImportError:
+    pass  # Models will be loaded by Alembic

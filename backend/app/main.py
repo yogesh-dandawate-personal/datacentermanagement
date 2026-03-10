@@ -34,6 +34,9 @@ from app.routes.kpi import router as kpi_router
 from app.routes.marketplace import router as marketplace_router
 from app.routes.reporting import router as reporting_router
 from app.routes.workflow import router as workflow_router
+from app.routes.report_export import router as report_export_router
+from app.routes.evidence import router as evidence_router
+from app.routes.copilot import router as copilot_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -67,6 +70,9 @@ app.include_router(kpi_router)
 app.include_router(marketplace_router)
 app.include_router(reporting_router)
 app.include_router(workflow_router)
+app.include_router(report_export_router)  # Report export endpoints
+app.include_router(evidence_router)  # Evidence repository endpoints
+app.include_router(copilot_router)  # Executive Copilot Q&A endpoints
 
 # Mount frontend assets
 frontend_dist = Path(__file__).parent.parent.parent / "frontend" / "dist"

@@ -457,10 +457,10 @@ export function Landing() {
           </div>
         </div>
       </footer>
-      </main>
 
       {/* Login Modal */}
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+      </main>
     </div>
   )
 }
