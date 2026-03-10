@@ -1,10 +1,13 @@
 """NetZero ESG Platform API"""
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 import logging
 import uuid
 from datetime import datetime
+import os
+from pathlib import Path
 
 from app.auth.jwt_handler import create_access_token, verify_token
 from app.auth.utils import extract_token_from_header, validate_token_format
@@ -64,6 +67,15 @@ app.include_router(kpi_router)
 app.include_router(marketplace_router)
 app.include_router(reporting_router)
 app.include_router(workflow_router)
+
+# Mount frontend assets
+frontend_dist = Path(__file__).parent.parent.parent / "frontend" / "dist"
+if frontend_dist.exists():
+    # Mount static assets under /assets
+    app.mount("/assets", StaticFiles(directory=str(frontend_dist / "assets")), name="assets")
+    logger.info(f"Frontend assets mounted from: {frontend_dist / 'assets'}")
+else:
+    logger.warning(f"Frontend dist directory not found at: {frontend_dist}")
 
 # Global exception handler
 @app.exception_handler(NetZeroException)
@@ -200,6 +212,28 @@ async def health_check():
         version="1.0.0",
         timestamp=datetime.utcnow(),
     )
+
+
+# Serve frontend index.html for all non-API routes (SPA routing)
+@app.get("/{full_path:path}")
+async def serve_frontend(full_path: str):
+    """
+    Serve frontend SPA - returns index.html for all non-API routes
+    This allows React Router to handle all client-side routes
+    """
+    # Don't serve index.html for API routes or assets
+    if full_path.startswith("api/") or full_path.startswith("assets/"):
+        from fastapi.responses import JSONResponse
+        return JSONResponse({"error": "Not found"}, status_code=404)
+
+    frontend_dist = Path(__file__).parent.parent.parent / "frontend" / "dist"
+    index_path = frontend_dist / "index.html"
+
+    if index_path.exists():
+        return FileResponse(index_path)
+
+    from fastapi.responses import JSONResponse
+    return JSONResponse({"error": "Frontend not found"}, status_code=404)
 
 
 if __name__ == "__main__":
