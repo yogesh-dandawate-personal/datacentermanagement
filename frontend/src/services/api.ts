@@ -6,7 +6,12 @@
 
 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
 const API_BASE_URL = process.env.REACT_APP_API_URL || (isLocalhost ? 'http://localhost:8000/api/v1' : '/api/v1')
-const USE_MOCK_DATA = isLocalhost && (localStorage.getItem('USE_MOCK_API') === 'true' || localStorage.getItem('BYPASS_AUTH') === 'true')
+
+// Helper to check if mock data should be used (check at runtime, not module load time)
+const shouldUseMockData = () => {
+  if (!isLocalhost) return false
+  return localStorage.getItem('USE_MOCK_API') === 'true' || localStorage.getItem('BYPASS_AUTH') === 'true'
+}
 
 // Types for API responses
 export interface ApiResponse<T> {
@@ -181,9 +186,9 @@ class APIClient {
   // Auth endpoints
   async login(email: string, password: string): Promise<AuthResponse> {
     // Use mock data in dev mode
-    if (USE_MOCK_DATA) {
-      console.log('Using mock login response')
-      return {
+    if (shouldUseMockData()) {
+      console.log('✅ Using mock login response (dev mode)')
+      const mockResponse: AuthResponse = {
         access_token: 'mock_token_' + Math.random().toString(36).substr(2, 9),
         token_type: 'bearer',
         user: {
@@ -193,6 +198,8 @@ class APIClient {
           organization_id: 'org-001',
         },
       }
+      this.setToken(mockResponse.access_token)
+      return mockResponse
     }
 
     const response = await this.request<AuthResponse>('/auth/login', {
@@ -210,9 +217,9 @@ class APIClient {
     company: string
   }): Promise<AuthResponse> {
     // Use mock data in dev mode
-    if (USE_MOCK_DATA) {
-      console.log('Using mock signup response')
-      return {
+    if (shouldUseMockData()) {
+      console.log('✅ Using mock signup response (dev mode)')
+      const mockResponse: AuthResponse = {
         access_token: 'mock_token_' + Math.random().toString(36).substr(2, 9),
         token_type: 'bearer',
         user: {
@@ -222,6 +229,8 @@ class APIClient {
           organization_id: 'org-' + Math.random().toString(36).substr(2, 9),
         },
       }
+      this.setToken(mockResponse.access_token)
+      return mockResponse
     }
 
     const response = await this.request<AuthResponse>('/auth/signup', {
