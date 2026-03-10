@@ -4,6 +4,9 @@ import { Dashboard } from './pages/Dashboard'
 import { Energy } from './pages/Energy'
 import { Reports } from './pages/Reports'
 import { Settings } from './pages/Settings'
+import { Marketplace } from './pages/Marketplace'
+import { Portfolio } from './pages/Portfolio'
+import { Trading } from './pages/Trading'
 import { Layout } from './components/Layout'
 import { AuthProvider } from './context/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -55,6 +58,36 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Settings />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marketplace"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Marketplace />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/portfolio"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Portfolio />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/trading"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Trading />
                 </Layout>
               </ProtectedRoute>
             }

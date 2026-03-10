@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Zap, BarChart3, FileText, Settings, LogOut, Menu, X, Bell, User, Search } from 'lucide-react'
+import { Zap, BarChart3, FileText, Settings, LogOut, Menu, X, Bell, User, Search, ShoppingCart, Wallet, TrendingUp } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 interface LayoutProps {
@@ -15,6 +15,11 @@ export function Layout({ children }: LayoutProps) {
     { icon: BarChart3, label: 'Dashboard', href: '/dashboard', color: 'text-blue-400' },
     { icon: Zap, label: 'Energy', href: '/energy', color: 'text-yellow-400' },
     { icon: FileText, label: 'Reports', href: '/reports', color: 'text-green-400' },
+    { divider: true },
+    { icon: ShoppingCart, label: 'Marketplace', href: '/marketplace', color: 'text-cyan-400' },
+    { icon: Wallet, label: 'Portfolio', href: '/portfolio', color: 'text-emerald-400' },
+    { icon: TrendingUp, label: 'Trading', href: '/trading', color: 'text-orange-400' },
+    { divider: true },
     { icon: Settings, label: 'Settings', href: '/settings', color: 'text-purple-400' },
   ]
 
@@ -48,7 +53,10 @@ export function Layout({ children }: LayoutProps) {
 
         {/* Navigation */}
         <nav className="p-4 space-y-2" aria-label="Sidebar navigation">
-          {navItems.map((item) => {
+          {navItems.map((item, index) => {
+            if (item.divider) {
+              return <div key={`divider-${index}`} className="my-2 border-t border-slate-700/50" />
+            }
             const Icon = item.icon
             return (
               <button
