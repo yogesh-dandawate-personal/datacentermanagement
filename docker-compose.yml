@@ -1,81 +1,49 @@
-version: '3.9'
+version: '3.8'
 
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    container_name: netzero-postgres
-    environment:
-      POSTGRES_USER: ${DB_USER:-netzero}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      POSTGRES_DB: ${DB_NAME:-netzero}
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_ENVIRONMENT=development
+    depends_on:
+      - backend
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U netzero"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
-      - netzero-network
-    restart: unless-stopped
+      - inetze ro-network
+    container_name: inetze ro-frontend
 
-  # Backend API Service
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: netzero-backend
-    depends_on:
-      postgres:
-        condition: service_healthy
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://netzero:postgres@postgres:5432/netzero}
-      DATABASE_POOL_SIZE: ${DATABASE_POOL_SIZE:-20}
-      DATABASE_POOL_MAX_OVERFLOW: ${DATABASE_POOL_MAX_OVERFLOW:-40}
-      DATABASE_POOL_PRE_PING: ${DATABASE_POOL_PRE_PING:-true}
-      SECRET_KEY: ${SECRET_KEY:?ERROR: SECRET_KEY environment variable not set}
-      API_KEY: ${API_KEY:-local-dev-key-change-in-production}
-      PYTHONUNBUFFERED: ${PYTHONUNBUFFERED:-1}
-      ENV: ${ENV:-development}
+      - DATABASE_URL=sqlite:///./inetze ro.db
+      - DEBUG=true
+      - LOG_LEVEL=info
     volumes:
       - ./backend:/app
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/api/v1/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
-      - netzero-network
-    restart: unless-stopped
-    command: >
-      sh -c "
-      python -m alembic upgrade head 2>/dev/null || echo 'No migrations' &&
-      uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-      "
-
-  # Frontend Service
-  frontend:
-    image: node:20-alpine
-    container_name: netzero-frontend
-    depends_on:
-      - backend
-    ports:
-      - "3000:5173"
-    environment:
-      VITE_API_URL: http://localhost:8000
-      NODE_ENV: development
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    working_dir: /app
-    networks:
-      - netzero-network
-    restart: unless-stopped
-    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+      - inetze ro-network
+    container_name: inetze ro-backend
 
 networks:
-  netzero-network:
+  inetze ro-network:
     driver: bridge
-
-volumes:
-  postgres_data:
