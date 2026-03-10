@@ -341,6 +341,38 @@ class APIClient {
     return this.request<ComplianceMetrics>('/compliance/metrics')
   }
 
+  async getComplianceStatus(): Promise<any> {
+    return this.request('/compliance/status')
+  }
+
+  async getComplianceScore(): Promise<any> {
+    return this.request('/compliance/score')
+  }
+
+  async getComplianceMatrix(framework: string): Promise<any> {
+    return this.request(`/compliance/matrix/${framework}`)
+  }
+
+  async getComplianceGaps(): Promise<any> {
+    return this.request('/compliance/gaps')
+  }
+
+  async getRemediationTasks(): Promise<any> {
+    return this.request('/compliance/tasks')
+  }
+
+  async getTargetTracking(): Promise<any> {
+    return this.request('/compliance/targets')
+  }
+
+  async getKPITargets(): Promise<any> {
+    return this.request('/compliance/kpi-targets')
+  }
+
+  async getAuditTrail(): Promise<any> {
+    return this.request('/compliance/audit-trail')
+  }
+
   // Settings endpoints
   async getUserProfile(): Promise<UserProfile> {
     return this.request<UserProfile>('/users/profile')
@@ -366,6 +398,18 @@ class APIClient {
     })
   }
 
+  // Copilot endpoints
+  async askCopilot(question: string): Promise<any> {
+    return this.request('/copilot/ask', {
+      method: 'POST',
+      body: JSON.stringify({ question }),
+    })
+  }
+
+  async getCopilotHistory(): Promise<any[]> {
+    return this.request('/copilot/history')
+  }
+
   // Utility endpoints
   async healthCheck(): Promise<{ status: string; version: string }> {
     try {
@@ -373,6 +417,29 @@ class APIClient {
     } catch (error) {
       return { status: 'error', version: 'unknown' }
     }
+  }
+
+  // Generic get/post methods for flexible endpoint access
+  async get<T>(endpoint: string): Promise<T> {
+    return this.request<T>(endpoint, { method: 'GET' })
+  }
+
+  async post<T>(endpoint: string, data?: any): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async put<T>(endpoint: string, data?: any): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async delete<T>(endpoint: string): Promise<T> {
+    return this.request<T>(endpoint, { method: 'DELETE' })
   }
 }
 

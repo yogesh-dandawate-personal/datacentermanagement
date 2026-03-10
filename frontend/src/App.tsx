@@ -7,6 +7,9 @@ import { Settings } from './pages/Settings'
 import { Marketplace } from './pages/Marketplace'
 import { Portfolio } from './pages/Portfolio'
 import { Trading } from './pages/Trading'
+import { Approvals } from './pages/Approvals'
+import { Copilot } from './pages/Copilot'
+import { Compliance } from './pages/Compliance'
 import { Layout } from './components/Layout'
 import { AuthProvider } from './context/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -88,6 +91,36 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Trading />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/approvals"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Approvals />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/copilot"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Copilot />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/compliance"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Compliance />
                 </Layout>
               </ProtectedRoute>
             }

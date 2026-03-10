@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Zap, BarChart3, FileText, Settings, LogOut, Menu, X, Bell, User, Search, ShoppingCart, Wallet, TrendingUp } from 'lucide-react'
+import { Zap, BarChart3, FileText, Settings, LogOut, Menu, X, Bell, User, Search, ShoppingCart, Wallet, TrendingUp, MessageSquare, CheckSquare, ClipboardList } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { usePendingApprovalsCount } from '../hooks/useApprovals'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -14,16 +15,20 @@ export function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const location = useLocation()
   const navigate = useNavigate()
+  const pendingApprovalsCount = usePendingApprovalsCount()
 
   const navItems: NavItem[] = [
     { icon: BarChart3, label: 'Dashboard', href: '/dashboard', color: 'text-blue-400' },
     { icon: Zap, label: 'Energy', href: '/energy', color: 'text-yellow-400' },
     { icon: FileText, label: 'Reports', href: '/reports', color: 'text-green-400' },
+    { icon: ClipboardList, label: 'Compliance', href: '/compliance', color: 'text-violet-400' },
     { divider: true },
     { icon: ShoppingCart, label: 'Marketplace', href: '/marketplace', color: 'text-cyan-400' },
     { icon: Wallet, label: 'Portfolio', href: '/portfolio', color: 'text-emerald-400' },
     { icon: TrendingUp, label: 'Trading', href: '/trading', color: 'text-orange-400' },
     { divider: true },
+    { icon: CheckSquare, label: 'Approvals', href: '/approvals', color: 'text-indigo-400' },
+    { icon: MessageSquare, label: 'Copilot', href: '/copilot', color: 'text-pink-400' },
     { icon: Settings, label: 'Settings', href: '/settings', color: 'text-purple-400' },
   ]
 
@@ -33,7 +38,7 @@ export function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950">
       {/* Left Sidebar Navigation */}
       <aside role="navigation" aria-label="Main navigation"
-        className={`fixed hidden md:fixed left-0 top-0 h-screen bg-gradient-to-b from-slate-900 to-slate-950 border-r border-slate-800/50 backdrop-blur-xl transition-all duration-300 z-40 ${
+        className={`fixed left-0 top-0 h-screen bg-gradient-to-b from-slate-900 to-slate-950 border-r border-slate-800/50 backdrop-blur-xl transition-all duration-300 z-40 ${
           sidebarOpen ? 'w-64' : 'w-20'
         }`}
       >
@@ -100,7 +105,7 @@ export function Layout({ children }: LayoutProps) {
       </aside>
 
       {/* Main Content - Full width on mobile, margin on md+ */}
-      <div className={`transition-all duration-300 ml-0 md:${sidebarOpen ? 'ml-64' : 'ml-20'} flex flex-col min-h-screen`}>
+      <div className={`transition-all duration-300 flex flex-col min-h-screen ${sidebarOpen ? 'md:ml-64' : 'md:ml-20'}`}>
         {/* Top Header */}
         <header className="h-20 bg-gradient-to-r from-slate-900/80 to-slate-900/80 backdrop-blur-xl border-b border-slate-800/50 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30" role="banner">
           {/* Mobile Menu Button - Show only on mobile */}
@@ -130,11 +135,16 @@ export function Layout({ children }: LayoutProps) {
           <div className="flex items-center gap-2 sm:gap-4">
             {/* Notifications */}
             <button
+              onClick={() => navigate('/approvals')}
               className="relative p-2 hover:bg-slate-800 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-              aria-label="View notifications"
+              aria-label="View pending approvals"
             >
               <Bell className="w-5 h-5 text-slate-400 hover:text-white transition" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" aria-hidden="true"></span>
+              {pendingApprovalsCount > 0 && (
+                <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 rounded-full text-white text-xs font-bold flex items-center justify-center">
+                  {pendingApprovalsCount}
+                </span>
+              )}
             </button>
 
             {/* User Menu - Hidden text on mobile, show avatar only */}
