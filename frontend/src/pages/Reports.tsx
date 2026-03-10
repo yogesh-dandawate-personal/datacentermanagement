@@ -1,10 +1,10 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, Table, Pagination, Select, Spinner, Alert } from '../components/ui'
-import { FileText, Download, Eye, Trash2, Filter, Search } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, Pagination, Select, Spinner, Alert } from '../components/ui'
+import { FileText, Download, Eye, Search } from 'lucide-react'
 import { useState } from 'react'
 import { useReports, useComplianceMetrics } from '../hooks/useApi'
 
-const complianceData = [
+const fallbackComplianceData = [
   { month: 'Jan', scope1: 450, scope2: 380, scope3: 520 },
   { month: 'Feb', scope1: 430, scope2: 360, scope3: 500 },
   { month: 'Mar', scope1: 410, scope2: 340, scope3: 480 },
@@ -202,7 +202,7 @@ export function Reports() {
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={complianceData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+              <BarChart data={fallbackComplianceData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                 <XAxis dataKey="month" stroke="#64748b" style={{ fontSize: '12px' }} />
                 <YAxis stroke="#64748b" style={{ fontSize: '12px' }} label={{ value: 'tCO₂e', angle: -90, position: 'insideLeft' }} />

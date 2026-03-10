@@ -1,4 +1,4 @@
-import { ArrowRight, Zap, TrendingUp, Shield, Globe, BarChart3, Leaf, Check, X, ChevronDown } from 'lucide-react'
+import { ArrowRight, Zap, TrendingUp, Shield, Globe, BarChart3, Leaf, Check, ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 import { LoginModal } from '../components/LoginModal'
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui'

@@ -8,7 +8,7 @@ export interface Column {
   sortable?: boolean
 }
 
-interface TableProps {
+export interface TableProps {
   columns: Column[]
   data: any[]
   striped?: boolean

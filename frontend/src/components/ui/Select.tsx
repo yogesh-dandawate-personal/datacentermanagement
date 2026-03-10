@@ -7,7 +7,7 @@ interface SelectOption {
   disabled?: boolean
 }
 
-interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
+export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string
   error?: string
   hint?: string

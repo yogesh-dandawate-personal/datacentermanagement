@@ -1,7 +1,7 @@
 import { ReactNode, useEffect } from 'react'
 import { X } from 'lucide-react'
 
-interface DialogProps {
+export interface DialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   title?: string

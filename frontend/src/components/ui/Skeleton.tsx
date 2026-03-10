@@ -1,4 +1,4 @@
-interface SkeletonProps {
+export interface SkeletonProps {
   className?: string
   variant?: 'text' | 'circle' | 'rect'
 }

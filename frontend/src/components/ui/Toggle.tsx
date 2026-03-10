@@ -1,6 +1,6 @@
 import { InputHTMLAttributes, forwardRef } from 'react'
 
-interface ToggleProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface ToggleProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string
   description?: string
 }

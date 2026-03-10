@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { AlertCircle, CheckCircle, AlertTriangle, InfoIcon, X } from 'lucide-react'
 
-interface AlertProps {
+export interface AlertProps {
   variant?: 'info' | 'success' | 'warning' | 'error'
   title?: string
   message: string

@@ -1,6 +1,6 @@
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, Select, Input, Spinner, Alert } from '../components/ui'
-import { Download, TrendingDown, Zap, Calendar, Filter } from 'lucide-react'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, Select, Spinner, Alert } from '../components/ui'
+import { Download, TrendingDown, Zap, Filter } from 'lucide-react'
 import { useState } from 'react'
 import { useEnergyMetrics, useFacilities } from '../hooks/useApi'
 
@@ -45,14 +45,9 @@ export function Energy() {
   // Transform data for pie chart
   const facilityBreakdown = facilities.map((f, i) => ({
     name: f.name,
-    value: Math.floor(f.current_usage || (456 - i * 100)),
+    value: Math.floor((f as any).current_usage || (456 - i * 100)),
     fill: ['#0ea5e9', '#06b6d4', '#8b5cf6', '#a855f7'][i % 4],
   }))
-
-  const facilityOptions = [
-    { value: 'all', label: 'All Facilities' },
-    ...allFacilities.map(f => ({ value: f.id, label: f.name }))
-  ]
 
   const dateRangeOptions = [
     { value: '24h', label: 'Last 24 Hours' },
@@ -203,7 +198,7 @@ export function Energy() {
               </div>
             ) : (
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={metrics.trend_data}>
+                <LineChart data={metrics.trend_data as any}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                 <XAxis dataKey="time" stroke="#64748b" />
                 <YAxis stroke="#64748b" />

@@ -155,9 +155,12 @@ class APIClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+    }
+
+    if (typeof options.headers === 'object' && options.headers !== null) {
+      Object.assign(headers, options.headers)
     }
 
     if (this.token) {

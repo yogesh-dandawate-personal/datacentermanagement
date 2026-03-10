@@ -1,14 +1,14 @@
 import { ReactNode } from 'react'
 import { ChevronRight } from 'lucide-react'
 
-interface BreadcrumbItem {
+export interface BreadcrumbItem {
   label: string
   href?: string
   icon?: ReactNode
   active?: boolean
 }
 
-interface BreadcrumbProps {
+export interface BreadcrumbProps {
   items: BreadcrumbItem[]
   onNavigate?: (href: string) => void
   className?: string

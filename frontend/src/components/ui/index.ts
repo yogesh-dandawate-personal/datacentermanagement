@@ -26,8 +26,8 @@ export type { ToggleProps } from './Toggle'
 export { Badge } from './Badge'
 export type { BadgeProps } from './Badge'
 
-export { Table, Column } from './Table'
-export type { Column as TableColumn, TableProps } from './Table'
+export { Table } from './Table'
+export type { Column as TableColumn, Column, TableProps } from './Table'
 
 export { Pagination } from './Pagination'
 export type { PaginationProps } from './Pagination'

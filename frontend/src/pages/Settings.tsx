@@ -1,4 +1,4 @@
-import { Bell, Lock, Key, Zap, Users, CreditCard, LogOut, Save, CheckCircle, AlertCircle } from 'lucide-react'
+import { Bell, Lock, Key, Zap, Users, CreditCard, LogOut, Save, CheckCircle } from 'lucide-react'
 import { useState } from 'react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Button, Input, Toggle, Badge, Alert } from '../components/ui'
 import { useAuth } from '../context/AuthContext'

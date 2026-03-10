@@ -29,7 +29,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Initialize auth state on mount
   useEffect(() => {
     const initializeAuth = async () => {
-      const devMode = import.meta.env.DEV || localStorage.getItem('BYPASS_AUTH') === 'true'
+      const isDev = typeof process !== 'undefined' && process.env.NODE_ENV === 'development'
+      const devMode = isDev || localStorage.getItem('BYPASS_AUTH') === 'true'
       const storedToken = localStorage.getItem('auth_token')
       const storedUser = localStorage.getItem('auth_user')
 
