@@ -1,4 +1,4 @@
-import { ArrowRight, Zap, TrendingUp, Shield, Globe, BarChart3, Leaf, Check, ChevronDown } from 'lucide-react'
+import { ArrowRight, Zap, TrendingUp, Shield, Globe, BarChart3, Leaf, Check, ChevronDown, LayoutDashboard, Zap as Energy, FileText, ShoppingCart, Wallet, Activity, Settings as SettingsIcon, X, Building2, Database, TrendingDown, CheckCircle, MessageSquare, Landmark } from 'lucide-react'
 import { useState } from 'react'
 import { LoginModal } from '../components/LoginModal'
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui'
@@ -7,9 +7,126 @@ export function Landing() {
   const [showLogin, setShowLogin] = useState(false)
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly')
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+
+  interface Feature {
+    icon: any
+    label: string
+    color: string
+    description: string
+    group?: 'platform' | 'marketplace' | 'admin'
+  }
+
+  const features: Feature[] = [
+    // Core ESG Platform
+    { icon: LayoutDashboard, label: 'Dashboard', color: 'text-blue-400', description: 'Real-time energy monitoring', group: 'platform' },
+    { icon: Building2, label: 'Facilities', color: 'text-cyan-400', description: 'Site & asset management', group: 'platform' },
+    { icon: Energy, label: 'Energy', color: 'text-yellow-400', description: 'Energy analytics & trends', group: 'platform' },
+    { icon: Leaf, label: 'Carbon', color: 'text-green-500', description: 'Emissions calculations', group: 'platform' },
+    { icon: TrendingDown, label: 'KPIs', color: 'text-orange-400', description: 'PUE, CUE, WUE metrics', group: 'platform' },
+    { icon: Database, label: 'Evidence', color: 'text-indigo-400', description: 'Document repository', group: 'platform' },
+    { icon: FileText, label: 'Reports', color: 'text-green-400', description: 'Compliance reports', group: 'platform' },
+    { icon: CheckCircle, label: 'Approvals', color: 'text-pink-400', description: 'Workflow management', group: 'platform' },
+    { icon: MessageSquare, label: 'Copilot', color: 'text-purple-400', description: 'AI assistant', group: 'platform' },
+
+    // Carbon Marketplace
+    { icon: ShoppingCart, label: 'Marketplace', color: 'text-cyan-400', description: 'Browse & trade credits', group: 'marketplace' },
+    { icon: Landmark, label: 'Portfolio', color: 'text-emerald-400', description: 'Credit management', group: 'marketplace' },
+    { icon: Activity, label: 'Trading', color: 'text-orange-400', description: 'Trade history & analytics', group: 'marketplace' },
+
+    // Administration
+    { icon: SettingsIcon, label: 'Settings', color: 'text-purple-400', description: 'Configuration & preferences', group: 'admin' },
+  ]
+
+  const groupLabels = {
+    platform: '📊 ESG PLATFORM',
+    marketplace: '🛍️ CARBON MARKETPLACE',
+    admin: '⚙️ ADMINISTRATION'
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 flex">
+      {/* Left Sidebar Navigation */}
+      <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-slate-900/80 backdrop-blur border-r border-slate-700/50 transition-all duration-300 fixed left-0 top-0 h-screen z-40 flex flex-col`}>
+        {/* Sidebar Header */}
+        <div className="h-20 flex items-center justify-between px-4 border-b border-slate-700/50">
+          {sidebarOpen && (
+            <div className="flex items-center gap-2">
+              <Zap className="w-6 h-6 text-blue-400" />
+              <span className="font-bold text-white text-sm">iNetZero</span>
+            </div>
+          )}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 hover:bg-slate-800 rounded-lg transition text-slate-400"
+          >
+            {sidebarOpen ? <X className="w-4 h-4" /> : <BarChart3 className="w-4 h-4" />}
+          </button>
+        </div>
+
+        {/* Features List */}
+        <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
+          {(['platform', 'marketplace', 'admin'] as const).map((group) => {
+            const groupFeatures = features.filter(f => f.group === group)
+            if (groupFeatures.length === 0) return null
+
+            return (
+              <div key={group}>
+                {sidebarOpen && (
+                  <div className="text-xs font-semibold text-slate-500 mb-3 px-1">
+                    {groupLabels[group]}
+                  </div>
+                )}
+                <div className="space-y-2">
+                  {groupFeatures.map((feature) => {
+                    const Icon = feature.icon
+                    return (
+                      <div
+                        key={feature.label}
+                        className="group relative"
+                      >
+                        <button
+                          className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-slate-800/50 transition text-slate-300 hover:text-white text-sm"
+                          title={feature.label}
+                        >
+                          <Icon className={`w-5 h-5 ${feature.color} flex-shrink-0`} />
+                          {sidebarOpen && (
+                            <div className="flex-1 text-left">
+                              <div className="font-medium">{feature.label}</div>
+                              <div className="text-xs text-slate-400">{feature.description}</div>
+                            </div>
+                          )}
+                        </button>
+                        {!sidebarOpen && (
+                          <div className="absolute left-20 top-0 bg-slate-800 text-white px-3 py-2 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none text-sm z-50">
+                            {feature.label}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+                {group !== 'admin' && sidebarOpen && (
+                  <div className="mt-4 border-b border-slate-700/50" />
+                )}
+              </div>
+            )
+          })}
+        </nav>
+
+        {/* Sign In Button */}
+        <div className="p-4 border-t border-slate-700/50">
+          <Button
+            onClick={() => setShowLogin(true)}
+            className={`w-full ${sidebarOpen ? '' : 'p-2'} bg-blue-600 hover:bg-blue-700 text-white text-sm`}
+          >
+            {sidebarOpen ? '🚀 Sign In' : '→'}
+          </Button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className={`${sidebarOpen ? 'ml-64' : 'ml-20'} w-full transition-all duration-300`}>
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 backdrop-blur-md bg-slate-950/50 border-b border-primary-500/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
@@ -410,6 +527,7 @@ export function Landing() {
           </Button>
         </div>
       </section>
+      </main>
 
       {/* Footer */}
       <footer className="border-t border-slate-800 py-12 px-4 bg-slate-900/30">
