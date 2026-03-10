@@ -105,6 +105,231 @@ export interface OrganizationSettings {
   country: string
 }
 
+// Analytics Types
+export interface AnalyticsTrend {
+  month: string
+  emissions_co2: number
+  energy_usage_kwh: number
+  renewable_percentage: number
+  cost_usd: number
+  forecast?: boolean
+}
+
+export interface EnergyPattern {
+  timestamp: string
+  usage_kw: number
+  is_peak: boolean
+  anomaly_score?: number
+}
+
+export interface ForecastData {
+  current_month: string
+  projections: Array<{
+    month: string
+    emissions_co2: number
+    confidence_lower: number
+    confidence_upper: number
+  }>
+  accuracy_percentage: number
+}
+
+export interface SustainabilityScore {
+  overall_score: number // 0-100
+  breakdown: {
+    energy_efficiency: number
+    renewable_usage: number
+    emissions_reduction: number
+    compliance_adherence: number
+  }
+  trend: 'improving' | 'stable' | 'declining'
+  industry_percentile: number
+}
+
+// Reporting Types
+export interface ReportTemplate {
+  id: string
+  name: string
+  description: string
+  type: 'ESG' | 'Compliance' | 'Energy' | 'Custom'
+  sections: string[]
+  filters: Record<string, any>
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateReportTemplate {
+  name: string
+  description: string
+  type: string
+  sections: string[]
+  filters?: Record<string, any>
+}
+
+export interface ReportSchedule {
+  id: string
+  name: string
+  template_id: string
+  template_name: string
+  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly'
+  cron_expression: string
+  delivery_channels: Array<{
+    type: 'email' | 'slack' | 'webhook'
+    config: Record<string, any>
+  }>
+  enabled: boolean
+  last_run?: string
+  next_run: string
+  created_at: string
+}
+
+export interface CreateReportSchedule {
+  name: string
+  template_id: string
+  frequency: string
+  cron_expression: string
+  delivery_channels: Array<{
+    type: string
+    config: Record<string, any>
+  }>
+  enabled?: boolean
+}
+
+export interface ReportPreview {
+  template_id: string
+  template_name: string
+  generated_at: string
+  sections: Array<{
+    title: string
+    content: any
+  }>
+  total_pages: number
+  file_size_kb: number
+}
+
+export interface DeliveryLog {
+  id: string
+  schedule_id: string
+  schedule_name: string
+  report_name: string
+  channel: string
+  status: 'sent' | 'failed' | 'pending'
+  recipient: string
+  sent_at: string
+  error_message?: string
+}
+
+// Benchmarking Types
+export interface BenchmarkData {
+  industry: string
+  your_organization: {
+    emissions_intensity: number // tCO2e per $M revenue
+    energy_intensity: number // kWh per $M revenue
+    renewable_percentage: number
+  }
+  industry_average: {
+    emissions_intensity: number
+    energy_intensity: number
+    renewable_percentage: number
+  }
+  industry_best: {
+    emissions_intensity: number
+    energy_intensity: number
+    renewable_percentage: number
+  }
+}
+
+export interface PeerComparison {
+  your_percentile: number // 0-100
+  peers_data: Array<{
+    peer_id: string
+    emissions_intensity: number
+    energy_intensity: number
+    renewable_percentage: number
+  }>
+  your_position: number
+  total_peers: number
+}
+
+export interface GapAnalysisData {
+  metric: string
+  your_value: number
+  target_value: number
+  gap_percentage: number
+  unit: string
+  priority: 'high' | 'medium' | 'low'
+}
+
+export interface ImprovementRecommendation {
+  id: string
+  title: string
+  description: string
+  category: 'energy' | 'emissions' | 'renewable' | 'efficiency'
+  estimated_impact: {
+    emissions_reduction_percent: number
+    cost_savings_usd: number
+    payback_months: number
+  }
+  difficulty: 'easy' | 'medium' | 'hard'
+  priority_score: number
+}
+
+// Alerts Types
+export interface AlertItem {
+  id: string
+  type: 'threshold' | 'anomaly' | 'compliance' | 'system'
+  severity: 'critical' | 'high' | 'medium' | 'low'
+  title: string
+  message: string
+  metric?: string
+  current_value?: number
+  threshold_value?: number
+  facility_id?: string
+  facility_name?: string
+  timestamp: string
+  status: 'active' | 'dismissed' | 'snoozed'
+  snoozed_until?: string
+}
+
+export interface AlertSettings {
+  email_enabled: boolean
+  email_address: string
+  slack_enabled: boolean
+  slack_webhook_url?: string
+  push_enabled: boolean
+  quiet_hours: {
+    enabled: boolean
+    start_time: string // HH:mm format
+    end_time: string
+    timezone: string
+  }
+  severity_filter: Array<'critical' | 'high' | 'medium' | 'low'>
+}
+
+export interface AlertRule {
+  id: string
+  name: string
+  metric: string
+  condition: 'greater_than' | 'less_than' | 'equals' | 'change_percentage'
+  threshold: number
+  severity: 'critical' | 'high' | 'medium' | 'low'
+  enabled: boolean
+  facility_ids: string[] // empty array = all facilities
+  notification_channels: Array<'email' | 'slack' | 'push'>
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateAlertRule {
+  name: string
+  metric: string
+  condition: string
+  threshold: number
+  severity: string
+  enabled?: boolean
+  facility_ids?: string[]
+  notification_channels?: string[]
+}
+
 // API Client
 class APIClient {
   private baseURL: string
@@ -408,6 +633,297 @@ class APIClient {
 
   async getCopilotHistory(): Promise<any[]> {
     return this.request('/copilot/history')
+  }
+
+  // Analytics endpoints
+  async getAnalyticsTrends(months: number = 12): Promise<AnalyticsTrend[]> {
+    return this.request<AnalyticsTrend[]>(`/analytics/trends?months=${months}`)
+  }
+
+  async getEnergyPatterns(facilityId?: string, days: number = 30): Promise<EnergyPattern[]> {
+    const params = new URLSearchParams()
+    if (facilityId) params.append('facility_id', facilityId)
+    params.append('days', days.toString())
+    return this.request<EnergyPattern[]>(`/analytics/patterns?${params.toString()}`)
+  }
+
+  async getForecast(months: number = 6): Promise<ForecastData> {
+    return this.request<ForecastData>(`/analytics/forecast?months=${months}`)
+  }
+
+  async getSustainabilityScore(): Promise<SustainabilityScore> {
+    return this.request<SustainabilityScore>('/analytics/sustainability-score')
+  }
+
+  async exportAnalytics(format: 'pdf' | 'csv' = 'pdf'): Promise<Blob> {
+    const response = await fetch(`${this.baseURL}/analytics/export?format=${format}`, {
+      headers: { 'Authorization': `Bearer ${this.token}` },
+    })
+    if (!response.ok) throw new Error('Failed to export analytics')
+    return response.blob()
+  }
+
+  // Reporting endpoints
+  async getReportTemplates(): Promise<ReportTemplate[]> {
+    return this.request<ReportTemplate[]>('/reporting/templates')
+  }
+
+  async createReportTemplate(data: CreateReportTemplate): Promise<ReportTemplate> {
+    return this.request<ReportTemplate>('/reporting/templates', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async updateReportTemplate(id: string, data: Partial<ReportTemplate>): Promise<ReportTemplate> {
+    return this.request<ReportTemplate>(`/reporting/templates/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async deleteReportTemplate(id: string): Promise<void> {
+    return this.request(`/reporting/templates/${id}`, { method: 'DELETE' })
+  }
+
+  async getReportSchedules(): Promise<ReportSchedule[]> {
+    return this.request<ReportSchedule[]>('/reporting/schedules')
+  }
+
+  async createReportSchedule(data: CreateReportSchedule): Promise<ReportSchedule> {
+    return this.request<ReportSchedule>('/reporting/schedules', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async updateReportSchedule(id: string, data: Partial<ReportSchedule>): Promise<ReportSchedule> {
+    return this.request<ReportSchedule>(`/reporting/schedules/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async deleteReportSchedule(id: string): Promise<void> {
+    return this.request(`/reporting/schedules/${id}`, { method: 'DELETE' })
+  }
+
+  async previewReport(templateId: string, filters?: any): Promise<ReportPreview> {
+    return this.request<ReportPreview>('/reporting/preview', {
+      method: 'POST',
+      body: JSON.stringify({ template_id: templateId, filters }),
+    })
+  }
+
+  async getDeliveryLog(scheduleId?: string): Promise<DeliveryLog[]> {
+    const url = scheduleId ? `/reporting/delivery-log?schedule_id=${scheduleId}` : '/reporting/delivery-log'
+    return this.request<DeliveryLog[]>(url)
+  }
+
+  async resendReport(deliveryId: string): Promise<void> {
+    return this.request(`/reporting/delivery-log/${deliveryId}/resend`, { method: 'POST' })
+  }
+
+  // Benchmarking endpoints
+  async getBenchmarks(industry?: string): Promise<BenchmarkData> {
+    const url = industry ? `/benchmarking?industry=${industry}` : '/benchmarking'
+    return this.request<BenchmarkData>(url)
+  }
+
+  async getPeerComparison(): Promise<PeerComparison> {
+    return this.request<PeerComparison>('/benchmarking/peer-comparison')
+  }
+
+  async getGapAnalysis(): Promise<GapAnalysisData[]> {
+    return this.request<GapAnalysisData[]>('/benchmarking/gap-analysis')
+  }
+
+  async getImprovementPlan(): Promise<ImprovementRecommendation[]> {
+    return this.request<ImprovementRecommendation[]>('/benchmarking/improvement-plan')
+  }
+
+  async exportBenchmarks(format: 'pdf' | 'csv' = 'pdf'): Promise<Blob> {
+    const response = await fetch(`${this.baseURL}/benchmarking/export?format=${format}`, {
+      headers: { 'Authorization': `Bearer ${this.token}` },
+    })
+    if (!response.ok) throw new Error('Failed to export benchmarks')
+    return response.blob()
+  }
+
+  // Alerts endpoints
+  async getAlerts(status?: 'active' | 'dismissed' | 'snoozed'): Promise<AlertItem[]> {
+    const url = status ? `/alerts?status=${status}` : '/alerts'
+    return this.request<AlertItem[]>(url)
+  }
+
+  async getAlertHistory(limit: number = 50): Promise<AlertItem[]> {
+    return this.request<AlertItem[]>(`/alerts/history?limit=${limit}`)
+  }
+
+  async dismissAlert(id: string): Promise<void> {
+    return this.request(`/alerts/${id}/dismiss`, { method: 'POST' })
+  }
+
+  async snoozeAlert(id: string, minutes: number): Promise<void> {
+    return this.request(`/alerts/${id}/snooze`, {
+      method: 'POST',
+      body: JSON.stringify({ minutes }),
+    })
+  }
+
+  async getAlertSettings(): Promise<AlertSettings> {
+    return this.request<AlertSettings>('/alerts/settings')
+  }
+
+  async updateAlertSettings(data: Partial<AlertSettings>): Promise<AlertSettings> {
+    return this.request<AlertSettings>('/alerts/settings', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async getAlertRules(): Promise<AlertRule[]> {
+    return this.request<AlertRule[]>('/alerts/rules')
+  }
+
+  async createAlertRule(data: CreateAlertRule): Promise<AlertRule> {
+    return this.request<AlertRule>('/alerts/rules', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async updateAlertRule(id: string, data: Partial<AlertRule>): Promise<AlertRule> {
+    return this.request<AlertRule>(`/alerts/rules/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async deleteAlertRule(id: string): Promise<void> {
+    return this.request(`/alerts/rules/${id}`, { method: 'DELETE' })
+  }
+
+  // ============================================================================
+  // MARKETPLACE, TRADING, & PORTFOLIO ENDPOINTS (Sprint 8)
+  // ============================================================================
+
+  // Carbon Credit Management
+  async createCreditBatch(orgId: string, data: {
+    batch_name: string
+    total_quantity: number
+    credit_type?: string
+    vintage_year: number
+    description?: string
+    quality_score?: number
+  }): Promise<any> {
+    const params = new URLSearchParams({
+      batch_name: data.batch_name,
+      total_quantity: String(data.total_quantity),
+      vintage_year: String(data.vintage_year),
+      credit_type: data.credit_type || 'verified',
+      quality_score: String(data.quality_score || 100),
+    })
+    if (data.description) params.set('description', data.description)
+
+    return this.request(`/organizations/${orgId}/credits/create-batch?${params.toString()}`, {
+      method: 'POST',
+    })
+  }
+
+  async getOrganizationCredits(orgId: string, status: string = 'active'): Promise<any> {
+    return this.request(`/organizations/${orgId}/credits?status=${status}`)
+  }
+
+  async retireCredits(orgId: string, creditId: string, quantity: number, reason?: string): Promise<any> {
+    const params = new URLSearchParams({
+      quantity: String(quantity),
+    })
+    if (reason) params.set('reason', reason)
+
+    return this.request(`/organizations/${orgId}/credits/${creditId}/retire?${params.toString()}`, {
+      method: 'POST',
+    })
+  }
+
+  // Marketplace Listings
+  async createMarketplaceListing(orgId: string, data: {
+    batch_id: string
+    quantity: number
+    price_per_credit: number
+    listing_type: string
+    expires_in_days?: number
+    minimum_bid?: number
+  }): Promise<any> {
+    const params = new URLSearchParams({
+      batch_id: data.batch_id,
+      quantity: String(data.quantity),
+      price_per_credit: String(data.price_per_credit),
+      listing_type: data.listing_type,
+      expires_in_days: String(data.expires_in_days || 30),
+    })
+    if (data.minimum_bid) params.set('minimum_bid', String(data.minimum_bid))
+
+    return this.request(`/organizations/${orgId}/marketplace/listings?${params.toString()}`, {
+      method: 'POST',
+    })
+  }
+
+  async getMarketplaceListings(filters?: {
+    min_price?: number
+    max_price?: number
+    limit?: number
+  }): Promise<any> {
+    const params = new URLSearchParams()
+    if (filters?.min_price) params.set('min_price', String(filters.min_price))
+    if (filters?.max_price) params.set('max_price', String(filters.max_price))
+    if (filters?.limit) params.set('limit', String(filters.limit))
+
+    return this.request(`/marketplace/listings?${params.toString()}`)
+  }
+
+  async getMarketplaceListing(listingId: string): Promise<any> {
+    return this.request(`/marketplace/listings/${listingId}`)
+  }
+
+  // Trading
+  async executeTrade(data: {
+    listing_id: string
+    quantity: number
+    agreed_price?: number
+  }): Promise<any> {
+    const params = new URLSearchParams({
+      listing_id: data.listing_id,
+      quantity: String(data.quantity),
+    })
+    if (data.agreed_price) params.set('agreed_price', String(data.agreed_price))
+
+    return this.request(`/trades/execute?${params.toString()}`, {
+      method: 'POST',
+    })
+  }
+
+  async getTradeHistory(orgId: string, role: string = 'all', limit: number = 100): Promise<any> {
+    return this.request(`/organizations/${orgId}/trades?role=${role}&limit=${limit}`)
+  }
+
+  async completeTrade(tradeId: string, paymentConfirmed: boolean = true): Promise<any> {
+    return this.request(`/trades/${tradeId}/complete?payment_confirmed=${paymentConfirmed}`, {
+      method: 'POST',
+    })
+  }
+
+  // Marketplace Analytics
+  async getMarketPriceHistory(days: number = 30): Promise<any> {
+    return this.request(`/marketplace/analytics/price-history?days=${days}`)
+  }
+
+  async getTradingVolume(days: number = 30): Promise<any> {
+    return this.request(`/marketplace/analytics/volume?days=${days}`)
+  }
+
+  async getMarketInsights(): Promise<any> {
+    return this.request('/marketplace/analytics/market-insights')
   }
 
   // Utility endpoints

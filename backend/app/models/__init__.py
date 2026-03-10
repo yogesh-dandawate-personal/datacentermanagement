@@ -1500,3 +1500,52 @@ try:
     )
 except ImportError:
     pass  # Models will be loaded by Alembic
+
+
+# ============================================================================
+# SPRINT 9: ADVANCED ANALYTICS & REPORTING MODELS
+# ============================================================================
+try:
+    from .analytics import (
+        EmissionsTrend,
+        EnergyAnalysis,
+        WaterUsage,
+        WasteMetrics,
+        SustainabilityScore,
+        OptimizationOpportunity,
+    )
+except ImportError:
+    pass
+
+try:
+    from .reporting_advanced import (
+        ScheduledReport,
+        ReportTemplateAdvanced,
+        ReportDistribution,
+        ReportDeliveryLog,
+        ReportGenerationHistory,
+    )
+except ImportError:
+    pass
+
+try:
+    from .benchmarking import (
+        Benchmark,
+        ComparisonResult,
+        BenchmarkGap,
+        PeerGroup,
+        BenchmarkAlert,
+    )
+except ImportError:
+    pass
+
+try:
+    from .notifications import (
+        Notification,
+        NotificationPreference,
+        NotificationLog,
+        NotificationChannel,
+        NotificationTemplate,
+    )
+except ImportError:
+    pass
