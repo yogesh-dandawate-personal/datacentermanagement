@@ -1,9 +1,12 @@
 /**
  * API Service Layer
  * Centralized API client for all backend communication
+ * Uses mock data in development mode when backend is unavailable
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1'
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const API_BASE_URL = process.env.REACT_APP_API_URL || (isLocalhost ? 'http://localhost:8000/api/v1' : '/api/v1')
+const USE_MOCK_DATA = isLocalhost && (localStorage.getItem('USE_MOCK_API') === 'true' || localStorage.getItem('BYPASS_AUTH') === 'true')
 
 // Types for API responses
 export interface ApiResponse<T> {
@@ -177,6 +180,21 @@ class APIClient {
 
   // Auth endpoints
   async login(email: string, password: string): Promise<AuthResponse> {
+    // Use mock data in dev mode
+    if (USE_MOCK_DATA) {
+      console.log('Using mock login response')
+      return {
+        access_token: 'mock_token_' + Math.random().toString(36).substr(2, 9),
+        token_type: 'bearer',
+        user: {
+          id: 'user-001',
+          email: email || 'demo@inetze ro.local',
+          name: email?.split('@')[0] || 'Developer',
+          organization_id: 'org-001',
+        },
+      }
+    }
+
     const response = await this.request<AuthResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
@@ -191,6 +209,21 @@ class APIClient {
     full_name: string
     company: string
   }): Promise<AuthResponse> {
+    // Use mock data in dev mode
+    if (USE_MOCK_DATA) {
+      console.log('Using mock signup response')
+      return {
+        access_token: 'mock_token_' + Math.random().toString(36).substr(2, 9),
+        token_type: 'bearer',
+        user: {
+          id: 'user-' + Math.random().toString(36).substr(2, 9),
+          email: data.email,
+          name: data.full_name,
+          organization_id: 'org-' + Math.random().toString(36).substr(2, 9),
+        },
+      }
+    }
+
     const response = await this.request<AuthResponse>('/auth/signup', {
       method: 'POST',
       body: JSON.stringify(data),
