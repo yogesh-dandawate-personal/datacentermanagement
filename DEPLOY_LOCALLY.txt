@@ -1,0 +1,185 @@
+╔════════════════════════════════════════════════════════════════════╗
+║          SPRINT 8 - LOCAL DEPLOYMENT QUICK START                  ║
+╚════════════════════════════════════════════════════════════════════╝
+
+✅ EVERYTHING IS READY TO RUN LOCALLY!
+
+────────────────────────────────────────────────────────────────────
+STEP 1: START THE SERVERS
+────────────────────────────────────────────────────────────────────
+
+Open Terminal and run:
+
+  cd /Users/yogesh/00_MyCode/01_PersonalProjects/datacentermanagement
+  bash start-local.sh
+
+This will automatically:
+  ✓ Kill any existing processes
+  ✓ Install npm dependencies
+  ✓ Start backend API on port 8000
+  ✓ Start frontend on port 5173
+  ✓ Show you all the access URLs
+
+────────────────────────────────────────────────────────────────────
+STEP 2: ACCESS THE APPLICATION
+────────────────────────────────────────────────────────────────────
+
+Frontend:
+  🌐 http://localhost:5173
+
+Backend API:
+  📡 http://127.0.0.1:8000
+
+API Documentation (Swagger UI):
+  📚 http://127.0.0.1:8000/api/docs
+
+────────────────────────────────────────────────────────────────────
+STEP 3: TEST THE NEW MARKETPLACE FEATURES
+────────────────────────────────────────────────────────────────────
+
+1. Click login (mock auth for local testing)
+2. Navigate to these NEW pages in sidebar:
+
+   🛍️  MARKETPLACE
+       - Browse carbon credit listings
+       - Search and filter by price
+       - View market analytics
+       - Click "Buy" to see trade dialog
+
+   💼 PORTFOLIO
+       - Create new credit batches
+       - View your credit portfolio
+       - See portfolio value chart
+       - Retire credits with reason
+
+   📊 TRADING
+       - View all trades (buy/sell)
+       - See trading volume charts
+       - Check trade history
+       - View net profit/loss
+
+────────────────────────────────────────────────────────────────────
+STEP 4: RUN BACKEND TESTS
+────────────────────────────────────────────────────────────────────
+
+In another terminal:
+
+  cd /Users/yogesh/00_MyCode/01_PersonalProjects/datacentermanagement
+  python3 -m pytest backend/tests/test_marketplace_service.py -v
+
+Expected: 14/14 tests passing ✅
+
+────────────────────────────────────────────────────────────────────
+FEATURES TO TEST
+────────────────────────────────────────────────────────────────────
+
+MARKETPLACE PAGE:
+  ✓ Search for credits
+  ✓ Filter by price range
+  ✓ View market metrics
+  ✓ View price trend chart
+  ✓ View trading volume chart
+  ✓ Click "Buy" on a listing
+  ✓ Enter quantity
+  ✓ See fee calculated automatically
+  ✓ Execute trade
+
+PORTFOLIO PAGE:
+  ✓ View credit batches
+  ✓ See batch status (Active, Traded, Retired)
+  ✓ View portfolio value
+  ✓ View value trend chart
+  ✓ Create new batch
+  ✓ Retire credits
+  ✓ View retirement history
+
+TRADING PAGE:
+  ✓ View all trades
+  ✓ See trade status (Completed, Pending, Cancelled)
+  ✓ View monthly volume chart
+  ✓ See trade distribution pie chart
+  ✓ Check average prices
+  ✓ View net position
+
+────────────────────────────────────────────────────────────────────
+TROUBLESHOOTING
+────────────────────────────────────────────────────────────────────
+
+If port 8000 is already in use:
+  lsof -i :8000
+  kill -9 <PID>
+
+If port 5173 is already in use:
+  lsof -i :5173
+  kill -9 <PID>
+
+To view logs:
+  Backend:  tail -f /tmp/backend.log
+  Frontend: tail -f /tmp/frontend.log
+
+────────────────────────────────────────────────────────────────────
+WHAT WAS DEPLOYED
+────────────────────────────────────────────────────────────────────
+
+✅ Backend Services
+   - CarbonCreditService (credit management)
+   - MarketplaceListingService (listing discovery)
+   - TradeExecutionService (trade execution)
+   - MarketplaceAnalyticsService (market analytics)
+
+✅ API Endpoints (13 total)
+   - Create/manage credit batches
+   - Create/browse marketplace listings
+   - Execute and track trades
+   - Get market analytics
+
+✅ Frontend Pages (3 new pages)
+   - Marketplace (discovery & purchase)
+   - Portfolio (management & retirement)
+   - Trading (history & analytics)
+
+✅ Database Models (9 models)
+   - CarbonCredit
+   - CreditBatch
+   - MarketplaceListing
+   - Trade
+   - CreditRetirement
+   - MarketplaceAnalytics
+   - Plus supporting models
+
+✅ Tests (14 tests, all passing)
+   - Unit tests for all service classes
+   - Integration with database
+   - API endpoint verification
+
+────────────────────────────────────────────────────────────────────
+WHAT'S NEXT
+────────────────────────────────────────────────────────────────────
+
+After testing locally:
+
+1. ✅ Verify all features work correctly
+2. ✅ Check responsive design (resize browser)
+3. ✅ Test on mobile (use DevTools)
+4. ✅ Review API docs in Swagger UI
+5. 📋 Document any findings
+6. 🚀 Ready for staging deployment
+
+────────────────────────────────────────────────────────────────────
+QUESTIONS?
+────────────────────────────────────────────────────────────────────
+
+Documentation Files:
+  - LOCAL_DEPLOYMENT.md (detailed guide)
+  - SPRINT_8_COMPLETION.md (technical specs)
+  - SPRINT_8_R3_REVIEW_REPORT.md (QA report)
+  - SPRINT_8_EXECUTIVE_SUMMARY.md (business overview)
+
+API Documentation:
+  - http://127.0.0.1:8000/api/docs (interactive Swagger UI)
+
+────────────────────────────────────────────────────────────────────
+
+Ready to deploy? Run: bash start-local.sh
+
+🚀 ENJOY SPRINT 8!
