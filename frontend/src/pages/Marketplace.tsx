@@ -15,13 +15,6 @@ interface CarbonListing {
   quality: number
 }
 
-interface MarketAnalytics {
-  currentPrice: number
-  trend: number[]
-  volume: number
-  trades: number
-}
-
 const mockListings: CarbonListing[] = [
   {
     id: '1',
@@ -87,7 +80,6 @@ const mockVolumeData = [
 ]
 
 export function Marketplace() {
-  const [listings, setListings] = useState<CarbonListing[]>(mockListings)
   const [filteredListings, setFilteredListings] = useState<CarbonListing[]>(mockListings)
   const [searchTerm, setSearchTerm] = useState('')
   const [minPrice, setMinPrice] = useState('')
@@ -98,11 +90,11 @@ export function Marketplace() {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    let filtered = listings
+    let filtered = mockListings
 
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter(l =>
+      filtered = filtered.filter((l: CarbonListing) =>
         l.batchName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         l.seller.toLowerCase().includes(searchTerm.toLowerCase())
       )
@@ -110,14 +102,14 @@ export function Marketplace() {
 
     // Filter by price range
     if (minPrice) {
-      filtered = filtered.filter(l => l.pricePerCredit >= parseFloat(minPrice))
+      filtered = filtered.filter((l: CarbonListing) => l.pricePerCredit >= parseFloat(minPrice))
     }
     if (maxPrice) {
-      filtered = filtered.filter(l => l.pricePerCredit <= parseFloat(maxPrice))
+      filtered = filtered.filter((l: CarbonListing) => l.pricePerCredit <= parseFloat(maxPrice))
     }
 
     setFilteredListings(filtered)
-  }, [listings, searchTerm, minPrice, maxPrice])
+  }, [searchTerm, minPrice, maxPrice])
 
   const handleExecuteTrade = async () => {
     if (!selectedListing || !tradeQuantity) return
@@ -143,11 +135,11 @@ export function Marketplace() {
     }
   }
 
-  const avgPrice = listings.length > 0
-    ? (listings.reduce((sum, l) => sum + l.pricePerCredit, 0) / listings.length).toFixed(2)
+  const avgPrice = mockListings.length > 0
+    ? (mockListings.reduce((sum: number, l: CarbonListing) => sum + l.pricePerCredit, 0) / mockListings.length).toFixed(2)
     : '0'
 
-  const totalAvailable = listings.reduce((sum, l) => sum + l.quantity, 0)
+  const totalAvailable = mockListings.reduce((sum: number, l: CarbonListing) => sum + l.quantity, 0)
 
   return (
     <div className="space-y-6">
@@ -188,7 +180,7 @@ export function Marketplace() {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm text-slate-400 mb-1">Market Listings</p>
-                <p className="text-2xl font-bold text-white">{listings.length}</p>
+                <p className="text-2xl font-bold text-white">{mockListings.length}</p>
               </div>
               <ShoppingCart className="w-8 h-8 text-cyan-400" />
             </div>

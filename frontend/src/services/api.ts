@@ -5,7 +5,7 @@
  */
 
 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-const API_BASE_URL = (import.meta.env.VITE_API_URL as string) || (isLocalhost ? 'http://127.0.0.1:8000/api/v1' : '/api/v1')
+const API_BASE_URL = import.meta.env.VITE_API_URL || (isLocalhost ? 'http://127.0.0.1:8000/api/v1' : '/api/v1')
 
 // Helper to check if mock data should be used (check at runtime, not module load time)
 const shouldUseMockData = () => {

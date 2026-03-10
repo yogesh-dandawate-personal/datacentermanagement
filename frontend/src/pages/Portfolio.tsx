@@ -1,7 +1,7 @@
-import { Plus, Trash2, RotateCw, Wallet, Zap, Target, ArrowRight } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, Button, Badge, Dialog, Input, Textarea, Spinner } from '../components/ui'
+import { Plus, RotateCw, Wallet, Zap, Target, ArrowRight } from 'lucide-react'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, Button, Badge, Dialog, Input, Textarea } from '../components/ui'
 import { useState } from 'react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts'
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts'
 
 interface CreditBatch {
   id: string

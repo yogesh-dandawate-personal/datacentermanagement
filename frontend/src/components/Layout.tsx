@@ -6,12 +6,16 @@ interface LayoutProps {
   children: React.ReactNode
 }
 
+type NavItem =
+  | { icon: React.ComponentType<any>; label: string; href: string; color: string; divider?: false }
+  | { divider: true }
+
 export function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const location = useLocation()
   const navigate = useNavigate()
 
-  const navItems = [
+  const navItems: NavItem[] = [
     { icon: BarChart3, label: 'Dashboard', href: '/dashboard', color: 'text-blue-400' },
     { icon: Zap, label: 'Energy', href: '/energy', color: 'text-yellow-400' },
     { icon: FileText, label: 'Reports', href: '/reports', color: 'text-green-400' },
@@ -54,7 +58,7 @@ export function Layout({ children }: LayoutProps) {
         {/* Navigation */}
         <nav className="p-4 space-y-2" aria-label="Sidebar navigation">
           {navItems.map((item, index) => {
-            if (item.divider) {
+            if ('divider' in item && item.divider) {
               return <div key={`divider-${index}`} className="my-2 border-t border-slate-700/50" />
             }
             const Icon = item.icon

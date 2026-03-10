@@ -1,4 +1,4 @@
-import { ArrowRight, Zap, TrendingUp, Shield, Globe, BarChart3, Leaf, Check, ChevronDown, LayoutDashboard, Zap as Energy, FileText, ShoppingCart, Wallet, Activity, Settings as SettingsIcon, X, Building2, Database, TrendingDown, CheckCircle, MessageSquare, Landmark } from 'lucide-react'
+import { ArrowRight, Zap, TrendingUp, Shield, Globe, BarChart3, Leaf, Check, ChevronDown, LayoutDashboard, Zap as Energy, FileText, ShoppingCart, Activity, Settings as SettingsIcon, X, Building2, Database, TrendingDown, CheckCircle, MessageSquare, Landmark } from 'lucide-react'
 import { useState } from 'react'
 import { LoginModal } from '../components/LoginModal'
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui'
