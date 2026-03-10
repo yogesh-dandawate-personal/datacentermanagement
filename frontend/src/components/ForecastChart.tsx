@@ -99,7 +99,6 @@ export function ForecastChart({ forecast }: ForecastChartProps) {
             }}
             labelStyle={{ color: '#f1f5f9', fontWeight: 'bold', marginBottom: '8px' }}
             itemStyle={{ color: '#cbd5e1', fontSize: '13px' }}
-            formatter={(value: number) => value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           />
 
           <Legend

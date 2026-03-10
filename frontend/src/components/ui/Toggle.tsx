@@ -1,12 +1,20 @@
 import { InputHTMLAttributes, forwardRef } from 'react'
 
-export interface ToggleProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface ToggleProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   label?: string
   description?: string
+  onChange?: (checked: boolean) => void
 }
 
 export const Toggle = forwardRef<HTMLInputElement, ToggleProps>(
-  ({ label, description, ...props }, ref) => (
+  ({ label, description, onChange, ...props }, ref) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (onChange) {
+        onChange(e.target.checked)
+      }
+    }
+
+    return (
     <div className="flex items-center justify-between">
       <div>
         {label && (
@@ -22,6 +30,7 @@ export const Toggle = forwardRef<HTMLInputElement, ToggleProps>(
           ref={ref}
           type="checkbox"
           className="sr-only"
+          onChange={handleChange}
           {...props}
         />
         <div className={`
@@ -36,7 +45,7 @@ export const Toggle = forwardRef<HTMLInputElement, ToggleProps>(
         `} />
       </div>
     </div>
-  )
+  )}
 )
 
 Toggle.displayName = 'Toggle'

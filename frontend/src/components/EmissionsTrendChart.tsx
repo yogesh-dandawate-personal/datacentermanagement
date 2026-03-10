@@ -3,7 +3,7 @@
  * 12-month emissions trend visualization with forecast overlay
  */
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, ComposedChart } from 'recharts'
+import { XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, ComposedChart, Line } from 'recharts'
 import type { AnalyticsTrend } from '../services/api'
 
 interface EmissionsTrendChartProps {
@@ -138,7 +138,6 @@ export function EmissionsTrendChart({ trends }: EmissionsTrendChartProps) {
             strokeWidth={3}
             fill="url(#emissionsGradient)"
             name="Emissions (tCO₂e)"
-            strokeDasharray={(entry: any) => (entry.isForecast ? '5 5' : '0')}
           />
 
           {/* Energy Line */}

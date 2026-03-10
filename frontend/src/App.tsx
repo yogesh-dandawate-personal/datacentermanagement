@@ -10,6 +10,9 @@ import { Trading } from './pages/Trading'
 import { Approvals } from './pages/Approvals'
 import { Copilot } from './pages/Copilot'
 import { Compliance } from './pages/Compliance'
+import { Analytics } from './pages/Analytics'
+import { Benchmarking } from './pages/Benchmarking'
+import { Alerts } from './pages/Alerts'
 import { Layout } from './components/Layout'
 import { AuthProvider } from './context/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -121,6 +124,36 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Compliance />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Analytics />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/benchmarking"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Benchmarking />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/alerts"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Alerts />
                 </Layout>
               </ProtectedRoute>
             }

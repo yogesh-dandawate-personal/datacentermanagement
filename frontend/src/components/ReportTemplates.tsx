@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react'
-import { FileText, Plus, Edit2, Trash2, Copy } from 'lucide-react'
+import { FileText, Plus, Edit2, Trash2 } from 'lucide-react'
 import { Button } from './ui/Button'
 import { Card } from './ui/Card'
 import { Input } from './ui/Input'
@@ -49,7 +49,7 @@ export function ReportTemplates({ templates, onCreate, onUpdate, onDelete }: Rep
 
     try {
       if (editing) {
-        await onUpdate(editing.id, formData)
+        await onUpdate(editing.id, formData as Partial<ReportTemplate>)
       } else {
         await onCreate(formData as CreateReportTemplate)
       }

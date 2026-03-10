@@ -24,7 +24,6 @@ export function EnergyPatternAnalysis({ patterns }: EnergyPatternAnalysisProps) 
   const peakCount = patterns.filter((p) => p.is_peak).length
   const anomalyCount = patterns.filter((p) => (p.anomaly_score || 0) > 0.7).length
   const avgUsage = patterns.reduce((sum, p) => sum + p.usage_kw, 0) / patterns.length
-  const maxUsage = Math.max(...patterns.map((p) => p.usage_kw))
 
   // Format data for chart (sample every 2 hours to avoid clutter)
   const chartData = patterns
@@ -109,10 +108,6 @@ export function EnergyPatternAnalysis({ patterns }: EnergyPatternAnalysisProps) 
             }}
             labelStyle={{ color: '#f1f5f9', fontWeight: 'bold', marginBottom: '4px' }}
             itemStyle={{ color: '#cbd5e1', fontSize: '13px' }}
-            formatter={(value: number) => [
-              `${value.toLocaleString()} kW`,
-              'Usage',
-            ]}
           />
 
           <Bar dataKey="usage" radius={[4, 4, 0, 0]}>

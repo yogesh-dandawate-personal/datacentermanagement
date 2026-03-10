@@ -61,7 +61,7 @@ export function ReportScheduler({
 
     try {
       if (editingSchedule) {
-        await onUpdateSchedule(editingSchedule.id, formData)
+        await onUpdateSchedule(editingSchedule.id, formData as Partial<ReportSchedule>)
       } else {
         await onCreateSchedule(formData as CreateReportSchedule)
       }

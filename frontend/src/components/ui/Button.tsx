@@ -1,10 +1,11 @@
-import { ButtonHTMLAttributes, forwardRef } from 'react'
+import { ButtonHTMLAttributes, forwardRef, ReactNode } from 'react'
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
   size?: 'sm' | 'md' | 'lg'
   loading?: boolean
   fullWidth?: boolean
+  icon?: ReactNode
 }
 
 const variants = {
@@ -22,7 +23,7 @@ const sizes = {
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = 'primary', size = 'md', loading = false, fullWidth = false, className = '', ...props }, ref) => (
+  ({ variant = 'primary', size = 'md', loading = false, fullWidth = false, icon, className = '', children, ...props }, ref) => (
     <button
       ref={ref}
       disabled={loading || props.disabled}
@@ -30,13 +31,17 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         font-medium transition-all duration-200
         focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-slate-900
         focus:outline-none
+        flex items-center justify-center gap-2
         ${variants[variant]} ${sizes[size]}
         ${fullWidth ? 'w-full' : ''}
         ${loading ? 'opacity-75 cursor-not-allowed' : ''}
         ${className}
       `}
       {...props}
-    />
+    >
+      {icon && <span className="flex-shrink-0">{icon}</span>}
+      {children}
+    </button>
   )
 )
 

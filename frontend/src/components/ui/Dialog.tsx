@@ -3,7 +3,8 @@ import { X } from 'lucide-react'
 
 export interface DialogProps {
   open: boolean
-  onOpenChange: (open: boolean) => void
+  onOpenChange?: (open: boolean) => void
+  onClose?: () => void
   title?: string
   description?: string
   children: ReactNode
@@ -22,6 +23,7 @@ const sizeStyles = {
 export function Dialog({
   open,
   onOpenChange,
+  onClose,
   title,
   description,
   children,
@@ -29,11 +31,19 @@ export function Dialog({
   size = 'md',
   className = '',
 }: DialogProps) {
+  const handleClose = () => {
+    if (onClose) {
+      onClose()
+    } else if (onOpenChange) {
+      onOpenChange(false)
+    }
+  }
+
   // Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && open) {
-        onOpenChange(false)
+        handleClose()
       }
     }
 
@@ -46,7 +56,7 @@ export function Dialog({
       document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = 'unset'
     }
-  }, [open, onOpenChange])
+  }, [open, onOpenChange, onClose])
 
   if (!open) return null
 
@@ -55,7 +65,7 @@ export function Dialog({
       {/* Overlay */}
       <div
         className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
-        onClick={() => onOpenChange(false)}
+        onClick={handleClose}
         aria-hidden="true"
       />
 
@@ -84,7 +94,7 @@ export function Dialog({
                 )}
               </div>
               <button
-                onClick={() => onOpenChange(false)}
+                onClick={handleClose}
                 className="p-1 hover:bg-slate-800 rounded-lg transition-colors"
                 aria-label="Close dialog"
               >

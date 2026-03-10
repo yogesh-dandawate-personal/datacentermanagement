@@ -18,7 +18,6 @@ import { Alert } from '../components/ui/Alert'
 
 export function Analytics() {
   const [timeRange, setTimeRange] = useState('12') // months
-  const [facilityId, setFacilityId] = useState<string | undefined>(undefined)
   const [exporting, setExporting] = useState(false)
 
   const {
@@ -30,7 +29,7 @@ export function Analytics() {
     error,
     refetch,
     exportAnalytics,
-  } = useAnalytics(Number(timeRange), facilityId, 30)
+  } = useAnalytics(Number(timeRange), undefined, 30)
 
   const handleExport = async (format: 'pdf' | 'csv') => {
     setExporting(true)
