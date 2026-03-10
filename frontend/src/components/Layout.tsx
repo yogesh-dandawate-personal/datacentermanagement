@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Zap, BarChart3, FileText, Settings, LogOut, Menu, X, Bell, User, Search, ShoppingCart, Wallet, TrendingUp, MessageSquare, CheckSquare, ClipboardList } from 'lucide-react'
+import { Zap, BarChart3, FileText, Settings, LogOut, Menu, X, Bell, User, Search, ShoppingCart, Wallet, TrendingUp, MessageSquare, CheckSquare, ClipboardList, LineChart, Target, AlertTriangle, Cloud } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { usePendingApprovalsCount } from '../hooks/useApprovals'
 
@@ -20,13 +20,17 @@ export function Layout({ children }: LayoutProps) {
   const navItems: NavItem[] = [
     { icon: BarChart3, label: 'Dashboard', href: '/dashboard', color: 'text-blue-400' },
     { icon: Zap, label: 'Energy', href: '/energy', color: 'text-yellow-400' },
+    { icon: LineChart, label: 'Analytics', href: '/analytics', color: 'text-cyan-400' },
     { icon: FileText, label: 'Reports', href: '/reports', color: 'text-green-400' },
     { icon: ClipboardList, label: 'Compliance', href: '/compliance', color: 'text-violet-400' },
+    { icon: Cloud, label: 'Emissions', href: '/emissions', color: 'text-green-400' },
     { divider: true },
     { icon: ShoppingCart, label: 'Marketplace', href: '/marketplace', color: 'text-cyan-400' },
     { icon: Wallet, label: 'Portfolio', href: '/portfolio', color: 'text-emerald-400' },
     { icon: TrendingUp, label: 'Trading', href: '/trading', color: 'text-orange-400' },
     { divider: true },
+    { icon: Target, label: 'Benchmarking', href: '/benchmarking', color: 'text-teal-400' },
+    { icon: AlertTriangle, label: 'Alerts', href: '/alerts', color: 'text-red-400' },
     { icon: CheckSquare, label: 'Approvals', href: '/approvals', color: 'text-indigo-400' },
     { icon: MessageSquare, label: 'Copilot', href: '/copilot', color: 'text-pink-400' },
     { icon: Settings, label: 'Settings', href: '/settings', color: 'text-purple-400' },
