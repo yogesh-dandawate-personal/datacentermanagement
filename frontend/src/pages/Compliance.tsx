@@ -3,8 +3,8 @@
  * Main page for monitoring GRI/TCFD/CDP compliance status
  */
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, Spinner, Alert } from '../components/ui'
+import { useState } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, Spinner } from '../components/ui'
 import { ComplianceScore as ComplianceScoreComponent } from '../components/ComplianceScore'
 import { ComplianceMatrix } from '../components/ComplianceMatrix'
 import { GapAnalysis } from '../components/GapAnalysis'
@@ -20,7 +20,7 @@ import {
   useKPITargets,
   useAuditTrail,
 } from '../hooks/useCompliance'
-import { Download, FileText, Clock, AlertTriangle, CheckCircle2, TrendingUp } from 'lucide-react'
+import { Download, Clock, AlertTriangle, CheckCircle2, TrendingUp } from 'lucide-react'
 
 type TabType = 'overview' | 'gri' | 'tcfd' | 'cdp' | 'gaps' | 'tasks' | 'targets' | 'audit'
 
@@ -111,7 +111,7 @@ export function Compliance() {
       </section>
 
       {/* Status Overview */}
-      {complianceStatus.data && (
+      {complianceStatus.data && complianceStatus.data.overallStatus && (
         <section>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6">
             {/* Overall Status */}

@@ -3,9 +3,9 @@
  * Displays progress towards emissions reduction and KPI targets
  */
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, SkeletonChart } from './ui'
-import { TrendingUp, Target, Zap, Droplets, Wind, Activity } from 'lucide-react'
+import { Target, Zap, Droplets, Wind, Activity } from 'lucide-react'
 import { TargetTrackingData, KPITarget } from '../types/compliance'
 
 interface TargetTrackingProps {
@@ -28,12 +28,6 @@ export function TargetTracking({ targets, kpiTargets, loading }: TargetTrackingP
         </Card>
       </div>
     )
-  }
-
-  const getStatusColor = (status: string) => {
-    if (status === 'On Track') return 'text-green-400'
-    if (status === 'At Risk') return 'text-yellow-400'
-    return 'text-red-400'
   }
 
   const getStatusBgColor = (status: string) => {
@@ -201,7 +195,7 @@ export function TargetTracking({ targets, kpiTargets, loading }: TargetTrackingP
                       <div>
                         <p className="text-xs text-slate-400 mb-1">Current</p>
                         <p className="text-lg font-bold text-white">{kpi.currentValue}</p>
-                        <p className="text-xs text-slate-500">{kpi.currentUnit}</p>
+                        <p className="text-xs text-slate-500">{kpi.targetUnit}</p>
                       </div>
                       <div>
                         <p className="text-xs text-slate-400 mb-1">Target</p>
