@@ -30,6 +30,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const initializeAuth = async () => {
       const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+
+      // Auto-enable dev mode on localhost
+      if (isLocalhost) {
+        localStorage.setItem('BYPASS_AUTH', 'true')
+        localStorage.setItem('USE_MOCK_API', 'true')
+      }
+
       const devMode = isLocalhost || localStorage.getItem('BYPASS_AUTH') === 'true'
       const storedToken = localStorage.getItem('auth_token')
       const storedUser = localStorage.getItem('auth_user')
