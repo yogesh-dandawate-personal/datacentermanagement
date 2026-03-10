@@ -126,9 +126,9 @@ export function Landing() {
       </aside>
 
       {/* Main Content */}
-      <main className={`${sidebarOpen ? 'ml-64' : 'ml-20'} w-full transition-all duration-300`}>
+      <main className={`${sidebarOpen ? 'ml-64' : 'ml-20'} w-full transition-all duration-300 min-h-screen flex flex-col`}>
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 backdrop-blur-md bg-slate-950/50 border-b border-primary-500/20">
+      <nav className={`fixed top-0 ${sidebarOpen ? 'left-64' : 'left-20'} right-0 z-50 backdrop-blur-md bg-slate-950/50 border-b border-primary-500/20 transition-all duration-300`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Zap className="w-8 h-8 text-primary-400" />
@@ -151,7 +151,7 @@ export function Landing() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4">
+      <section className="pt-40 pb-20 px-4">
         <div className="max-w-6xl mx-auto text-center">
           {/* Badge */}
           <div className="mb-8 inline-block px-4 py-2 bg-primary-500/10 border border-primary-500/30 rounded-full backdrop-blur">
@@ -527,10 +527,9 @@ export function Landing() {
           </Button>
         </div>
       </section>
-      </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 py-12 px-4 bg-slate-900/30">
+      <footer className="border-t border-slate-800 py-12 px-4 bg-slate-900/30 mt-auto">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
@@ -572,6 +571,7 @@ export function Landing() {
           </div>
         </div>
       </footer>
+      </main>
 
       {/* Login Modal */}
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
