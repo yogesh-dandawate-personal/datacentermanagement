@@ -1,15 +1,23 @@
-import { Bell, Lock, Key, Zap, Users, CreditCard, LogOut, Save, CheckCircle } from 'lucide-react'
+import { Bell, Lock, Key, Zap, Users, CreditCard, LogOut, Save, CheckCircle, AlertCircle } from 'lucide-react'
 import { useState } from 'react'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Button, Input, Toggle, Badge } from '../components/ui'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Button, Input, Toggle, Badge, Alert } from '../components/ui'
+import { useAuth } from '../context/AuthContext'
+import { useMutation } from '../hooks/useApi'
+import api from '../services/api'
 
 export function Settings() {
+  const auth = useAuth()
   const [activeTab, setActiveTab] = useState('profile')
-  const [isSaving, setIsSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState(false)
+
+  const updateProfileMutation = useMutation()
+  const updateOrgMutation = useMutation()
+
   const [formData, setFormData] = useState({
-    fullName: 'John Doe',
-    email: 'john@company.com',
+    fullName: auth.user?.name || 'John Doe',
+    email: auth.user?.email || 'john@company.com',
     company: 'iNetZero Corp',
     timezone: 'UTC-8',
     orgName: 'iNetZero Corp',
@@ -20,15 +28,36 @@ export function Settings() {
     confirmPassword: '',
   })
 
+  const isSaving = updateProfileMutation.loading || updateOrgMutation.loading
+
   const handleSave = async () => {
-    setIsSaving(true)
+    setSaveError('')
     setSaveSuccess(false)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setIsSaving(false)
-    setSaveSuccess(true)
-    // Hide success message after 3 seconds
-    setTimeout(() => setSaveSuccess(false), 3000)
+
+    try {
+      if (activeTab === 'profile') {
+        await updateProfileMutation.execute(() =>
+          api.updateUserProfile({
+            full_name: formData.fullName,
+            email: formData.email,
+            company: formData.company,
+            timezone: formData.timezone,
+          })
+        )
+      } else if (activeTab === 'organization') {
+        await updateOrgMutation.execute(() =>
+          api.updateOrganizationSettings({
+            name: formData.orgName,
+            industry: formData.industry,
+          })
+        )
+      }
+
+      setSaveSuccess(true)
+      setTimeout(() => setSaveSuccess(false), 3000)
+    } catch (error) {
+      setSaveError('Failed to save settings. Please try again.')
+    }
   }
 
   const tabs = [
@@ -47,6 +76,31 @@ export function Settings() {
         <h1 className="text-3xl font-bold text-white mb-2">Settings</h1>
         <p className="text-slate-400">Manage your account and preferences</p>
       </div>
+
+      {/* Success Alert */}
+      {saveSuccess && (
+        <Alert
+          variant="success"
+          title="Settings Saved"
+          message="Your settings have been updated successfully."
+          onClose={() => setSaveSuccess(false)}
+        />
+      )}
+
+      {/* Error Alert */}
+      {saveError && (
+        <Alert
+          variant="error"
+          title="Error"
+          message={saveError}
+          action={
+            <Button size="sm" variant="outline" onClick={handleSave} disabled={isSaving}>
+              Retry
+            </Button>
+          }
+          onClose={() => setSaveError('')}
+        />
+      )}
 
       {/* Tab Navigation */}
       <div className="flex flex-wrap gap-2 border-b border-slate-700/30 pb-4">

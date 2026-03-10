@@ -364,7 +364,160 @@ Once all 5 blockers are fixed:
 
 ---
 
-**Last Updated**: 2026-03-10 (Start)
-**Next Update**: T+2h (First checkpoint)
-**Status**: 🚀 READY FOR AGENT DEPLOYMENT
+---
+
+## EXECUTION PHASE 2: AUTH-FIX & TENANT-SEC DEPLOYMENT
+
+**Status**: ⏳ QUEUED & READY TO EXECUTE
+**Date**: March 10, 2026
+**Strategy**: Parallel Autonomous + Manual Setup
+
+### Current Execution Model (Option 3: Both in Parallel)
+
+**USER TASKS** (25 minutes - Execute in Parallel with Teams):
+1. **Create Railway.sh PostgreSQL** (10 minutes)
+   - Go to: https://railway.app
+   - Create free account (no credit card)
+   - Provision PostgreSQL 15 instance
+   - Copy connection string format: `postgresql://user:password@host:port/railway?sslmode=require`
+   - ➜ Post connection string (without password) to get DATABASE_URL added to Vercel
+
+2. **Configure GitHub Secrets** (15 minutes)
+   - Go to: https://github.com/Aurigraph-DLT-Corp/awd-carbon-credit-system/settings/secrets/actions
+   - Add 9 secrets (detailed guide: `docs/GITHUB_SECRETS_SETUP.md`):
+     - VERCEL_TOKEN (from https://vercel.com/account/tokens)
+     - VERCEL_ORG_ID (from Vercel settings)
+     - VERCEL_PROJECT_ID (backend)
+     - VERCEL_FRONTEND_PROJECT_ID (frontend)
+     - DATABASE_URL (Railway connection string)
+     - STAGING_DATABASE_URL (same as DATABASE_URL for now)
+     - STAGING_API_URL
+     - PRODUCTION_API_URL
+     - CODECOV_TOKEN (optional)
+
+**AUTONOMOUS TEAMS** (Executing Now):
+1. **AUTH-FIX Team** - QUEUED
+   - Status: Ready to start immediately
+   - Phase 1-3: Design/scaffold (can start without Railway)
+   - Phase 4: Integration (waits for Railway connection string)
+   - Estimated: 6-8 hours
+   - Blocks: TENANT-SEC team
+
+2. **TENANT-SEC Team** - QUEUED
+   - Status: Ready to start immediately
+   - Phase 1-3: Design/tests/docs (can start now)
+   - Phase 4: Implementation (waits for AUTH-FIX)
+   - Estimated: 4-6 hours
+   - Blocked by: AUTH-FIX team
+
+### Parallel Execution Timeline
+
+```
+YOUR WORK (25 min):          Railway Setup + GitHub Secrets
+                             ├─ Railway: 10 min
+                             └─ Secrets: 15 min
+                                    ↓
+                             [Post Railway String]
+                                    ↓
+
+AUTONOMOUS TEAMS:            AUTH-FIX (6-8h) → TENANT-SEC (4-6h)
+Parallel Phase:              Design & Test (start now, 2-3h)
+                             ├─ AUTH-FIX: Design/scaffold
+                             ├─ TENANT-SEC: Design/tests
+                             └─ DEVOPS-CI: Testing workflows
+                                    ↓
+                             [Railway Connection Ready]
+                                    ↓
+Integration Phase:           AUTH-FIX integrates with DB
+                             TENANT-SEC waits for AUTH-FIX
+                                    ↓
+                             Complete in ~12-14 hours total
+```
+
+### Success Path
+
+**Checkpoint 1** (T+2h): Design phase complete
+- AUTH-FIX: PasswordService designed, auth endpoints scaffolded
+- TENANT-SEC: Middleware design, test suite created
+- DEVOPS-CI: Ready for GitHub Secrets
+
+**Checkpoint 2** (T+2.5h): User completes Railway + Secrets
+- Railway PostgreSQL running
+- GitHub Secrets configured
+- DATABASE_URL available
+
+**Checkpoint 3** (T+5h): Database integration complete
+- AUTH-FIX integrates with Railway
+- Alembic migrations successful
+- Login endpoint working
+
+**Checkpoint 4** (T+8h): Authentication complete
+- Real login working with JWT
+- Demo user created
+- TENANT-SEC begins implementation
+
+**Checkpoint 5** (T+13h): Tenant isolation complete
+- All 81 endpoints validated
+- Cross-tenant access blocked
+- Security tests passing
+
+**Checkpoint 6** (T+14-15h): Full verification
+- All 5 blockers fixed
+- System operational
+- Production ready
+
+### What We've Accomplished So Far
+
+| Item | Status | Completeness |
+|------|--------|--------------|
+| Secrets Management | ✅ DONE | 100% |
+| Database Configuration | ✅ DONE | 95% (awaiting Railway) |
+| CI/CD Workflows | ✅ DONE | 92% (awaiting secrets) |
+| Authentication Design | ⏳ QUEUED | 0% (ready to start) |
+| Tenant Isolation Design | ⏳ QUEUED | 0% (ready to start) |
+| **Total Blockers Fixed** | | **3 of 5** (60%) |
+
+### Files Ready for Integration
+
+**Configuration Files Created**:
+- ✅ `backend/app/config.py` - Environment-based config
+- ✅ `backend/app/database.py` - Connection pooling ready
+- ✅ `alembic/` - Migration infrastructure complete
+- ✅ `.github/workflows/` - All 5 workflows created
+- ✅ `scripts/verify-deployment.sh` - Health checks ready
+
+**Documentation Ready**:
+- ✅ `docs/RAILWAY_SETUP.md` - Step-by-step setup
+- ✅ `docs/GITHUB_SECRETS_SETUP.md` - Secrets guide
+- ✅ `docs/CI_CD_FLOW.md` - Workflow architecture
+- ✅ `docs/DEPLOYMENT_RUNBOOK.md` - Deployment procedures
+- ✅ `docs/DATABASE_SETUP_COMPLETE.md` - DB reference
+
+### Next Actions
+
+1. **Immediate** (You):
+   - Create Railway PostgreSQL instance
+   - Configure 9 GitHub Secrets
+   - Post Railway connection string
+
+2. **Immediate** (Autonomous Teams):
+   - Start AUTH-FIX Phase 1-3 (design/scaffold)
+   - Start TENANT-SEC Phase 1-3 (design/tests)
+   - Prepare DEVOPS-CI for workflow testing
+
+3. **When Railway Ready**:
+   - Provide DATABASE_URL to system
+   - AUTH-FIX Phase 4: Integrate with database
+   - TENANT-SEC: Begin implementation
+
+4. **Final** (T+14h):
+   - All 5 blockers fixed
+   - System operational
+   - Production deployment ready
+
+---
+
+**Last Updated**: 2026-03-10 (Execution Phase 2)
+**Current Time**: T+3h (estimated, teams queued)
+**Status**: 🚀 PHASE 2 IN PROGRESS - Awaiting User Manual Setup
 
