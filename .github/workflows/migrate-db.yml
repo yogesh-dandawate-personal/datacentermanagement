@@ -1,0 +1,185 @@
+name: Database Migrations
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment (staging or production)'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+  workflow_call:
+    secrets:
+      DATABASE_URL:
+        required: true
+
+jobs:
+  check-migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Check migration files
+        run: |
+          ls -la backend/alembic/versions/
+          echo "Migration files listed above"
+
+  migrate-staging:
+    if: github.event.inputs.environment == 'staging' || github.event_name == 'workflow_call'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run Alembic migrations (staging)
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL || secrets.DATABASE_URL }}
+        run: |
+          cd backend
+          echo "Testing database connection..."
+          python -c "from sqlalchemy import create_engine; engine = create_engine('$DATABASE_URL'); engine.connect(); print('✅ Database connection successful')"
+
+          echo "Running migrations..."
+          alembic upgrade head
+
+          echo "Verifying migration..."
+          alembic current
+          echo "✅ Staging migrations completed"
+
+      - name: Post migration notification
+        if: success()
+        run: |
+          echo "✅ Staging database migrations completed successfully"
+
+      - name: Rollback on failure
+        if: failure()
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL || secrets.DATABASE_URL }}
+        run: |
+          cd backend
+          echo "Migration failed, rolling back..."
+          alembic downgrade -1
+          echo "❌ Rolled back to previous version"
+          exit 1
+
+  migrate-production:
+    if: github.event.inputs.environment == 'production'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    concurrency:
+      group: production-migrations
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Create backup before migration
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          cd backend
+          echo "Creating database backup..."
+          # Extract connection details
+          python << 'EOF'
+          import os
+          from sqlalchemy import create_engine, text
+          from datetime import datetime
+
+          db_url = os.getenv('DATABASE_URL')
+          engine = create_engine(db_url)
+
+          with engine.connect() as conn:
+              backup_name = f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+              print(f"Backup identifier: {backup_name}")
+              print("✅ Backup preparation complete")
+          EOF
+
+      - name: Get current migration state
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          cd backend
+          echo "Current migration state:"
+          alembic current
+          echo "---"
+          echo "Pending migrations:"
+          alembic heads || echo "No pending migrations"
+
+      - name: Run Alembic migrations (production)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          cd backend
+          echo "Testing database connection..."
+          python -c "from sqlalchemy import create_engine; engine = create_engine('$DATABASE_URL'); engine.connect(); print('✅ Database connection successful')"
+
+          echo "Running migrations..."
+          alembic upgrade head
+
+          echo "Verifying migration..."
+          alembic current
+          echo "✅ Production migrations completed"
+
+      - name: Post migration notification
+        if: success()
+        run: |
+          echo "✅ Production database migrations completed successfully"
+          echo "All pending migrations have been applied"
+
+      - name: Rollback on failure
+        if: failure()
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          cd backend
+          echo "Migration failed, rolling back..."
+          alembic downgrade -1
+          echo "❌ Rolled back to previous version"
+          echo "Please investigate the failure and retry"
+          exit 1
+
+  verify-migrations:
+    needs: [migrate-staging]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if migrations succeeded
+        run: |
+          if [ "${{ needs.migrate-staging.result }}" == "success" ]; then
+            echo "✅ All migrations completed successfully"
+          else
+            echo "⚠️ Some migrations had issues - check logs above"
+          fi

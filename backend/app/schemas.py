@@ -80,6 +80,7 @@ class LoginRequest(BaseModel):
 class LoginResponse(BaseModel):
     """Response schema for login"""
     access_token: str = Field(..., description="JWT access token")
+    refresh_token: Optional[str] = Field(None, description="JWT refresh token (optional)")
     token_type: str = Field(default="bearer", description="Token type")
     user_id: str = Field(..., description="User ID")
     tenant_id: str = Field(..., description="Tenant ID")
@@ -89,10 +90,23 @@ class LoginResponse(BaseModel):
         json_schema_extra = {
             "example": {
                 "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
                 "token_type": "bearer",
                 "user_id": "550e8400-e29b-41d4-a716-446655440000",
                 "tenant_id": "550e8400-e29b-41d4-a716-446655440001",
                 "roles": ["admin", "editor"]
+            }
+        }
+
+
+class RefreshTokenRequest(BaseModel):
+    """Request schema for refreshing access token"""
+    refresh_token: str = Field(..., description="Valid refresh token")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
             }
         }
 

@@ -55,7 +55,9 @@ class User(Base):
     email = Column(String(255), nullable=False)
     first_name = Column(String(100))
     last_name = Column(String(100))
+    password_hash = Column(String(255), nullable=True)  # Argon2 hashed password (nullable for legacy/SSO users)
     is_active = Column(Boolean, default=True)
+    last_login = Column(DateTime, nullable=True)  # Track last login timestamp
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

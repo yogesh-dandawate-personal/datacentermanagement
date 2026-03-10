@@ -1,10 +1,14 @@
 # Environment variables
+# IMPORTANT: All .env files are excluded for security
+# Use GitHub Secrets or Vercel environment variables for sensitive data
 .env
 .env.local
 .env.*.local
 .env.development
 .env.test
 .env.production
+.env.staging
+.env.*.env
 
 # Dependencies
 node_modules/

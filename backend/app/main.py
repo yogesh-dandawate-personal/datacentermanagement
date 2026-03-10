@@ -22,6 +22,7 @@ from app.schemas import (
     ErrorResponse,
     HealthCheckResponse,
 )
+from app.routes.auth import router as auth_router
 from app.routes.organizations import router as org_router
 from app.routes.telemetry import router as telemetry_router
 from app.routes.dashboards import router as dashboards_router
@@ -54,6 +55,7 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth_router)  # Authentication routes
 app.include_router(org_router)
 app.include_router(telemetry_router)
 app.include_router(dashboards_router)
@@ -137,48 +139,8 @@ async def create_tenant(tenant: TenantCreate):
     )
 
 
-@app.post("/api/v1/auth/login", response_model=LoginResponse)
-async def login(credentials: LoginRequest):
-    """
-    User login endpoint
-
-    Authenticates user and returns JWT access token for subsequent API calls.
-
-    Args:
-        credentials: Email and password
-
-    Returns:
-        LoginResponse with access token and user details
-
-    Raises:
-        AuthenticationError: If credentials are invalid
-    """
-    logger.info(f"Login attempt for user: {credentials.email}")
-
-    # TODO: Validate against database or Keycloak
-    if not credentials.email or not credentials.password:
-        raise AuthenticationError("Email and password are required")
-
-    # Mock user validation - replace with real authentication
-    user_id = str(uuid.uuid4())
-    tenant_id = str(uuid.uuid4())
-    user_roles = ["admin", "editor"]
-
-    token = create_access_token(
-        user_id=user_id,
-        tenant_id=tenant_id,
-        roles=user_roles,
-    )
-
-    logger.info(f"User logged in successfully: {user_id}")
-
-    return LoginResponse(
-        access_token=token,
-        token_type="bearer",
-        user_id=user_id,
-        tenant_id=tenant_id,
-        roles=user_roles,
-    )
+# Authentication endpoints are now in app.routes.auth
+# This keeps main.py clean and separates concerns
 
 
 @app.get("/api/v1/users/me")

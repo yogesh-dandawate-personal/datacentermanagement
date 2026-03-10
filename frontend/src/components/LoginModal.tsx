@@ -1,5 +1,7 @@
 import { X, Mail, Lock, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react'
 import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 interface LoginModalProps {
   onClose: () => void
@@ -22,10 +24,13 @@ const validatePassword = (password: string): boolean => {
 }
 
 export function LoginModal({ onClose }: LoginModalProps) {
+  const auth = useAuth()
+  const navigate = useNavigate()
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
+  const [company, setCompany] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
@@ -65,23 +70,34 @@ export function LoginModal({ onClose }: LoginModalProps) {
 
     setIsLoading(true)
 
-    // Simulate API call
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Demo credentials check
-      const isValidLogin = !isSignUp && email === 'demo@example.com' && password === 'password'
-      const isValidSignUp = isSignUp && name && email && password
-
-      if (isValidLogin || isValidSignUp) {
-        setSubmitSuccess(true)
-        // Close modal after success
-        setTimeout(() => {
-          onClose()
-        }, 1500)
-      } else if (!isSignUp) {
-        setErrors({ submit: 'Invalid email or password. Try demo@example.com / password' })
+      if (isSignUp) {
+        // Sign up
+        const success = await auth.signup(email, password, name, company)
+        if (success) {
+          setSubmitSuccess(true)
+          setTimeout(() => {
+            onClose()
+            navigate('/dashboard')
+          }, 1500)
+        } else {
+          setErrors({ submit: 'Failed to create account. Please try again.' })
+        }
+      } else {
+        // Login
+        const success = await auth.login(email, password)
+        if (success) {
+          setSubmitSuccess(true)
+          setTimeout(() => {
+            onClose()
+            navigate('/dashboard')
+          }, 1500)
+        } else {
+          setErrors({ submit: 'Invalid email or password. Please try again.' })
+        }
       }
+    } catch (error) {
+      setErrors({ submit: 'An error occurred. Please try again later.' })
     } finally {
       setIsLoading(false)
     }
@@ -92,6 +108,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
     setEmail('')
     setPassword('')
     setName('')
+    setCompany('')
     setErrors({})
     setSubmitSuccess(false)
   }
@@ -137,33 +154,50 @@ export function LoginModal({ onClose }: LoginModalProps) {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Name Field (Sign Up Only) */}
             {isSignUp && (
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-slate-300 mb-2">
-                  Full Name
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => {
-                    setName(e.target.value)
-                    if (errors.name) setErrors({ ...errors, name: undefined })
-                  }}
-                  placeholder="John Doe"
-                  className={`w-full px-4 py-3 bg-slate-800/50 border rounded-lg text-white placeholder-slate-500 focus:outline-none transition ${
-                    errors.name
-                      ? 'border-danger-500/50 focus:border-danger-500'
-                      : 'border-slate-700/50 focus:border-blue-500/50'
-                  }`}
-                  disabled={isLoading}
-                />
-                {errors.name && (
-                  <p className="text-danger-400 text-xs mt-1 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    {errors.name}
-                  </p>
-                )}
-              </div>
+              <>
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-slate-300 mb-2">
+                    Full Name
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => {
+                      setName(e.target.value)
+                      if (errors.name) setErrors({ ...errors, name: undefined })
+                    }}
+                    placeholder="John Doe"
+                    className={`w-full px-4 py-3 bg-slate-800/50 border rounded-lg text-white placeholder-slate-500 focus:outline-none transition ${
+                      errors.name
+                        ? 'border-danger-500/50 focus:border-danger-500'
+                        : 'border-slate-700/50 focus:border-blue-500/50'
+                    }`}
+                    disabled={isLoading}
+                  />
+                  {errors.name && (
+                    <p className="text-danger-400 text-xs mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {errors.name}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="company" className="block text-sm font-medium text-slate-300 mb-2">
+                    Company Name
+                  </label>
+                  <input
+                    id="company"
+                    type="text"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                    placeholder="Your Company Inc."
+                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-lg text-white placeholder-slate-500 focus:outline-none transition focus:border-blue-500/50"
+                    disabled={isLoading}
+                  />
+                </div>
+              </>
             )}
 
             {/* Email Field */}
