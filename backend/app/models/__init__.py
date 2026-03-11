@@ -1746,3 +1746,34 @@ try:
     )
 except ImportError:
     pass
+
+# ============================================================================
+# SPRINT 14: RBAC SYSTEM MODELS (Enhanced)
+# ============================================================================
+try:
+    from .rbac import (
+        Permission,
+        RolePermission,
+        RoleEnhanced,
+        UserRoleEnhanced,
+        PermissionAuditLog,
+        RBACConfig,
+    )
+except ImportError:
+    pass
+
+
+# ============================================================================
+# SPRINT 15: GENERIC HIERARCHY FRAMEWORK MODELS
+# ============================================================================
+try:
+    from .hierarchy import (
+        HierarchyPattern,
+        HierarchyLevel,
+        HierarchyEntity,
+        HierarchyMigration,
+        HierarchyMigrationError,
+        HierarchyAuditLog,
+    )
+except ImportError:
+    pass
