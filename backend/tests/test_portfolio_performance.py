@@ -139,14 +139,15 @@ class TestPortfolioPerformance:
         db.commit()
 
         # Calculate total value
+        from sqlalchemy import func
         total_value = (
             db.query(PortfolioPosition)
             .filter_by(portfolio_id=portfolio.id)
-            .with_entities(db.func.sum(PortfolioPosition.current_value))
+            .with_entities(func.sum(PortfolioPosition.current_value))
             .scalar()
         )
 
-        assert total_value == 8750.00
+        assert float(total_value) == 8750.00
 
     def test_performance_metrics(self, db: Session, portfolio_test_data):
         """Test calculating portfolio performance metrics"""
@@ -220,8 +221,8 @@ class TestPortfolioPerformance:
 
         # Calculate allocation
         total_value = position1.current_value + position2.current_value
-        allocation1 = position1.current_value / total_value
-        allocation2 = position2.current_value / total_value
+        allocation1 = float(position1.current_value / total_value)
+        allocation2 = float(position2.current_value / total_value)
 
         # Target is 50/50, so rebalancing needed
         assert abs(allocation1 - 0.50) > 0.1  # More than 10% off target

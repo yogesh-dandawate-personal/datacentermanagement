@@ -288,4 +288,4 @@ class TestTradeMatching:
         # Verify match
         assert match.match_price == 50.00
         assert match.match_quantity == 100
-        assert match.match_score == 0.95
+        assert float(match.match_score) == 0.95
