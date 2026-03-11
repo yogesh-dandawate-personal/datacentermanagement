@@ -244,6 +244,72 @@ class EmissionsApiClient {
     return response.json()
   }
 
+  async getTrendAnalysis(orgId: string, facilityId?: string, days: number = 30, scope?: string) {
+    const params = new URLSearchParams()
+    params.append('days', days.toString())
+    if (facilityId) params.append('facility_id', facilityId)
+    if (scope) params.append('scope', scope)
+
+    const response = await fetch(
+      `${API_BASE}/api/v1/emissions/organizations/${orgId}/analytics/trend?${params}`,
+      { credentials: 'include' }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch trend analysis: ${response.statusText}`)
+    }
+
+    return response.json()
+  }
+
+  async getForecastEmissions(orgId: string, facilityId?: string, forecastDays: number = 30) {
+    const params = new URLSearchParams()
+    params.append('forecast_days', forecastDays.toString())
+    if (facilityId) params.append('facility_id', facilityId)
+
+    const response = await fetch(
+      `${API_BASE}/api/v1/emissions/organizations/${orgId}/analytics/forecast?${params}`,
+      { credentials: 'include' }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch emissions forecast: ${response.statusText}`)
+    }
+
+    return response.json()
+  }
+
+  async getOrganizationDashboard(orgId: string, facilityId?: string, period: string = 'current_month') {
+    const params = new URLSearchParams({ period })
+    if (facilityId) params.append('facility_id', facilityId)
+
+    const response = await fetch(
+      `${API_BASE}/api/v1/emissions/organizations/${orgId}/dashboard?${params}`,
+      { credentials: 'include' }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch organization dashboard: ${response.statusText}`)
+    }
+
+    return response.json()
+  }
+
+  async compareFacilities(orgId: string, period: string = 'current_month') {
+    const params = new URLSearchParams({ period })
+
+    const response = await fetch(
+      `${API_BASE}/api/v1/emissions/organizations/${orgId}/analytics/compare-facilities?${params}`,
+      { credentials: 'include' }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch facility comparison: ${response.statusText}`)
+    }
+
+    return response.json()
+  }
+
   /**
    * TARGETS
    */

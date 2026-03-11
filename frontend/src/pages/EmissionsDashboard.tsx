@@ -11,8 +11,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { useEmissionsDashboard } from '../hooks/useEmissionsDashboard';
-import { useForecastEmissions } from '../hooks/useForecastEmissions';
+import { useEmissionsDashboard, useForecastEmissions, useTrendAnalysis, useCompareFacilities } from '../hooks/useEmissions';
 import EmissionsSummaryCard from '../components/EmissionsSummaryCard';
 import TrendAnalysisChart from '../components/TrendAnalysisChart';
 import FacilityEmissionsTable from '../components/FacilityEmissionsTable';
@@ -33,7 +32,7 @@ const EmissionsDashboard: React.FC<EmissionsDashboardProps> = ({
   const [trendDays, setTrendDays] = useState(30);
 
   // Fetch dashboard data
-  const { data: dashboardData, loading: dashboardLoading, error: dashboardError } = useEmissionsDashboard({
+  const { data: dashboardData, loading: dashboardLoading } = useEmissionsDashboard({
     organizationId,
     facilityId,
     period
@@ -44,6 +43,20 @@ const EmissionsDashboard: React.FC<EmissionsDashboardProps> = ({
     organizationId,
     facilityId,
     forecast_days: 30
+  });
+
+  // Fetch trend analysis data
+  const { data: trendData } = useTrendAnalysis({
+    organizationId,
+    facilityId,
+    days: trendDays,
+    scope: selectedMetric === 'total' ? undefined : selectedMetric
+  });
+
+  // Fetch facility comparison
+  const { data: comparisonData } = useCompareFacilities({
+    organizationId,
+    period
   });
 
   if (dashboardLoading) {
@@ -67,38 +80,41 @@ const EmissionsDashboard: React.FC<EmissionsDashboardProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <EmissionsSummaryCard
             label="Total Emissions"
-            value={dashboardData?.total_tco2e || 0}
+            value={dashboardData?.emissions?.total_tco2e || 0}
             unit="tCO2e"
             unit_period="month"
-            trend={dashboardData?.total_trend || 0}
-            trendDirection={dashboardData?.total_trend_direction || 'neutral'}
+            trend={dashboardData?.metrics?.mom_change_pct || 0}
+            trendDirection={
+              (dashboardData?.metrics?.mom_change_pct || 0) > 0 ? 'up' :
+              (dashboardData?.metrics?.mom_change_pct || 0) < 0 ? 'down' : 'neutral'
+            }
             icon="📊"
             selected={selectedMetric === 'total'}
             onClick={() => setSelectedMetric('total')}
           />
           <EmissionsSummaryCard
             label="Scope 1 (Direct)"
-            value={dashboardData?.scope_1_tco2e || 0}
+            value={dashboardData?.emissions?.scope_1_tco2e || 0}
             unit="tCO2e"
-            percentage={(dashboardData?.scope_1_tco2e / (dashboardData?.total_tco2e || 1)) * 100}
+            percentage={dashboardData?.emissions?.scope_1_pct || 0}
             icon="🔥"
             selected={selectedMetric === 'scope1'}
             onClick={() => setSelectedMetric('scope1')}
           />
           <EmissionsSummaryCard
             label="Scope 2 (Electricity)"
-            value={dashboardData?.scope_2_tco2e || 0}
+            value={dashboardData?.emissions?.scope_2_tco2e || 0}
             unit="tCO2e"
-            percentage={(dashboardData?.scope_2_tco2e / (dashboardData?.total_tco2e || 1)) * 100}
+            percentage={dashboardData?.emissions?.scope_2_pct || 0}
             icon="⚡"
             selected={selectedMetric === 'scope2'}
             onClick={() => setSelectedMetric('scope2')}
           />
           <EmissionsSummaryCard
             label="Scope 3 (Indirect)"
-            value={dashboardData?.scope_3_tco2e || 0}
+            value={dashboardData?.emissions?.scope_3_tco2e || 0}
             unit="tCO2e"
-            percentage={(dashboardData?.scope_3_tco2e / (dashboardData?.total_tco2e || 1)) * 100}
+            percentage={dashboardData?.emissions?.scope_3_pct || 0}
             icon="🌍"
             selected={selectedMetric === 'scope3'}
             onClick={() => setSelectedMetric('scope3')}
@@ -138,16 +154,16 @@ const EmissionsDashboard: React.FC<EmissionsDashboardProps> = ({
               days={trendDays}
               scope={selectedMetric === 'total' ? undefined : selectedMetric}
             />
-            {dashboardData?.trend_analysis && (
+            {trendData && (
               <div className="mt-4 pt-4 border-t border-slate-700">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-slate-400">Trend Direction</p>
-                    <p className="text-white font-semibold">{dashboardData.trend_analysis.slope_direction}</p>
+                    <p className="text-white font-semibold capitalize">{trendData.slope_direction}</p>
                   </div>
                   <div>
-                    <p className="text-slate-400">R² Value</p>
-                    <p className="text-white font-semibold">{(dashboardData.trend_analysis.r_squared * 100).toFixed(1)}%</p>
+                    <p className="text-slate-400">Trend Strength</p>
+                    <p className="text-white font-semibold capitalize">{trendData.summary.trend_strength}</p>
                   </div>
                 </div>
               </div>
@@ -186,29 +202,28 @@ const EmissionsDashboard: React.FC<EmissionsDashboardProps> = ({
           <h2 className="text-xl font-bold text-white mb-4">Facilities Breakdown</h2>
           <FacilityEmissionsTable
             organizationId={organizationId}
-            metric="total_emissions"
             period={period}
           />
         </div>
 
         {/* Carbon Intensity Metrics */}
-        {dashboardData?.carbon_intensity && (
+        {dashboardData?.metrics && (
           <div className="mt-8 bg-slate-800 rounded-lg border border-slate-700 p-6 shadow-xl">
             <h2 className="text-xl font-bold text-white mb-4">Carbon Intensity Metrics</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-slate-700 rounded p-4">
                 <p className="text-slate-300 text-sm mb-1">Carbon Intensity</p>
-                <p className="text-white text-2xl font-bold">{dashboardData.carbon_intensity.toFixed(3)}</p>
-                <p className="text-slate-400 text-xs">kgCO2e per kWh</p>
+                <p className="text-white text-2xl font-bold">{dashboardData.metrics.carbon_intensity_gco2e_kwh.toFixed(3)}</p>
+                <p className="text-slate-400 text-xs">gCO2e per kWh</p>
               </div>
               <div className="bg-slate-700 rounded p-4">
-                <p className="text-slate-300 text-sm mb-1">Energy Consumption</p>
-                <p className="text-white text-2xl font-bold">{dashboardData.energy_kwh?.toLocaleString()}</p>
-                <p className="text-slate-400 text-xs">kWh</p>
+                <p className="text-slate-300 text-sm mb-1">Power Usage Effectiveness</p>
+                <p className="text-white text-2xl font-bold">{dashboardData.metrics.pue?.toFixed(2) || 'N/A'}</p>
+                <p className="text-slate-400 text-xs">PUE ratio</p>
               </div>
               <div className="bg-slate-700 rounded p-4">
                 <p className="text-slate-300 text-sm mb-1">Renewable Energy</p>
-                <p className="text-white text-2xl font-bold">{dashboardData.renewable_pct?.toFixed(1)}%</p>
+                <p className="text-white text-2xl font-bold">{dashboardData.metrics.renewable_pct.toFixed(1)}%</p>
                 <p className="text-slate-400 text-xs">of total energy</p>
               </div>
             </div>

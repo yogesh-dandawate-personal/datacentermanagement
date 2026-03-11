@@ -149,3 +149,72 @@ export interface AlertRule {
   severity: "info" | "warning" | "critical"
   is_enabled: boolean
 }
+
+export interface TrendAnalysisData {
+  period_start: string
+  period_end: string
+  data_points: Array<{
+    date: string
+    emissions_tco2e: number
+  }>
+  slope: number // tCO2e per day
+  intercept: number
+  r_squared: number // 0-1, goodness of fit
+  slope_direction: "increasing" | "decreasing" | "stable"
+  anomalies: Array<{
+    date: string
+    value: number
+    z_score: number
+  }>
+  summary: {
+    average_daily_emissions: number
+    min_emissions: number
+    max_emissions: number
+    trend_strength: "strong" | "moderate" | "weak" | "very_weak"
+  }
+}
+
+export interface ForecastData {
+  baseline_emissions_tco2e: number
+  forecast_days: number
+  forecast_period_start: string
+  forecast_period_end: string
+  confidence_level: "high" | "medium" | "low"
+  confidence_interval: number // percentage (e.g., 95)
+  trend_direction: "increasing" | "decreasing" | "stable"
+  forecasted_data: Array<{
+    date: string
+    predicted_emissions_tco2e: number
+    lower_bound_tco2e: number
+    upper_bound_tco2e: number
+  }>
+  summary: {
+    average_forecast: number
+    min_forecast: number
+    max_forecast: number
+    projected_total: number
+  }
+}
+
+export interface FacilityComparison {
+  organization_id: string
+  period: string
+  facilities: Array<{
+    facility_id: string
+    facility_name: string
+    scope_1_tco2e: number
+    scope_2_tco2e: number
+    scope_3_tco2e: number
+    total_tco2e: number
+    scope_1_pct: number
+    scope_2_pct: number
+    scope_3_pct: number
+  }>
+  portfolio_total: number
+  top_emitters: Array<{
+    facility_id: string
+    facility_name: string
+    emissions_tco2e: number
+    pct_of_total: number
+  }>
+}

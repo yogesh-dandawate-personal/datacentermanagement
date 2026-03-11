@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react'
 import { emissionsApi } from '@/services/emissions-api'
-import { DashboardData, PortfolioData, EmissionsAlert, EmissionsTarget, IngestionLog } from '@/types/emissions'
+import { DashboardData, PortfolioData, EmissionsAlert, EmissionsTarget, IngestionLog, TrendAnalysisData, ForecastData, FacilityComparison } from '@/types/emissions'
 
 export function useFacilityEmissions(facilityId: string, period: string = 'current_month') {
   const [data, setData] = useState<DashboardData | null>(null)
@@ -292,4 +292,140 @@ export function useActivityDataSubmission(orgId: string) {
   }
 
   return { submitSingle, uploadBatch, loading, error }
+}
+
+/**
+ * DASHBOARD & ANALYTICS HOOKS
+ */
+
+export function useEmissionsDashboard(params: {
+  organizationId: string
+  facilityId?: string
+  period?: 'current_month' | 'current_year' | 'last_30_days' | 'last_90_days'
+}) {
+  const [data, setData] = useState<DashboardData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const { organizationId, facilityId, period = 'current_month' } = params
+
+  useEffect(() => {
+    async function fetchDashboard() {
+      try {
+        setLoading(true)
+        setError(null)
+        const result = await emissionsApi.getOrganizationDashboard(organizationId, facilityId, period)
+        setData(result.data || result)
+      } catch (err: any) {
+        setError(err.message || 'Failed to load dashboard data')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (organizationId) {
+      fetchDashboard()
+    }
+  }, [organizationId, facilityId, period])
+
+  return { data, loading, error }
+}
+
+export function useForecastEmissions(params: {
+  organizationId: string
+  facilityId?: string
+  forecast_days?: number
+}) {
+  const [data, setData] = useState<ForecastData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const { organizationId, facilityId, forecast_days = 30 } = params
+
+  useEffect(() => {
+    async function fetchForecast() {
+      try {
+        setLoading(true)
+        setError(null)
+        const result = await emissionsApi.getForecastEmissions(organizationId, facilityId, forecast_days)
+        setData(result.data || result)
+      } catch (err: any) {
+        setError(err.message || 'Failed to load forecast data')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (organizationId) {
+      fetchForecast()
+    }
+  }, [organizationId, facilityId, forecast_days])
+
+  return { data, loading, error }
+}
+
+export function useTrendAnalysis(params: {
+  organizationId: string
+  facilityId?: string
+  days?: number
+  scope?: string
+}) {
+  const [data, setData] = useState<TrendAnalysisData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const { organizationId, facilityId, days = 30, scope } = params
+
+  useEffect(() => {
+    async function fetchTrend() {
+      try {
+        setLoading(true)
+        setError(null)
+        const result = await emissionsApi.getTrendAnalysis(organizationId, facilityId, days, scope)
+        setData(result.data || result)
+      } catch (err: any) {
+        setError(err.message || 'Failed to load trend analysis')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (organizationId) {
+      fetchTrend()
+    }
+  }, [organizationId, facilityId, days, scope])
+
+  return { data, loading, error }
+}
+
+export function useCompareFacilities(params: {
+  organizationId: string
+  period?: 'current_month' | 'current_year' | 'last_30_days' | 'last_90_days'
+}) {
+  const [data, setData] = useState<FacilityComparison | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const { organizationId, period = 'current_month' } = params
+
+  useEffect(() => {
+    async function fetchComparison() {
+      try {
+        setLoading(true)
+        setError(null)
+        const result = await emissionsApi.compareFacilities(organizationId, period)
+        setData(result.data || result)
+      } catch (err: any) {
+        setError(err.message || 'Failed to load facility comparison')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (organizationId) {
+      fetchComparison()
+    }
+  }, [organizationId, period])
+
+  return { data, loading, error }
 }

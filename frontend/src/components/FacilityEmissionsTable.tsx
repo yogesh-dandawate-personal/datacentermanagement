@@ -1,24 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useCompareFacilities } from '../hooks/useEmissions';
 
 interface FacilityEmissionsTableProps {
   organizationId: string;
-  metric: string;
-  period: string;
+  period?: 'current_month' | 'current_year' | 'last_30_days' | 'last_90_days';
 }
 
-const FacilityEmissionsTable: React.FC<FacilityEmissionsTableProps> = ({ organizationId, metric, period }) => {
-  const [facilities, setFacilities] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Placeholder: would call API in real implementation
-    setFacilities([]);
-    setLoading(false);
-  }, [organizationId, metric, period]);
+const FacilityEmissionsTable: React.FC<FacilityEmissionsTableProps> = ({ organizationId, period = 'current_month' }) => {
+  const { data: comparisonData, loading } = useCompareFacilities({
+    organizationId,
+    period
+  });
 
   if (loading) {
     return <div className="space-y-2"><div className="h-10 bg-slate-700 rounded animate-pulse"></div></div>;
   }
+
+  const facilities = comparisonData?.facilities || [];
 
   return (
     <div className="overflow-x-auto">
@@ -33,13 +31,13 @@ const FacilityEmissionsTable: React.FC<FacilityEmissionsTableProps> = ({ organiz
           </tr>
         </thead>
         <tbody>
-          {facilities.map((facility) => (
-            <tr key={facility.id} className="border-b border-slate-700 hover:bg-slate-700/30">
-              <td className="py-3 px-4 text-white font-medium">{facility.name}</td>
-              <td className="py-3 px-4 text-right text-slate-300">{facility.scope_1?.toLocaleString()} tCO2e</td>
-              <td className="py-3 px-4 text-right text-slate-300">{facility.scope_2?.toLocaleString()} tCO2e</td>
-              <td className="py-3 px-4 text-right text-slate-300">{facility.scope_3?.toLocaleString()} tCO2e</td>
-              <td className="py-3 px-4 text-right text-white font-semibold">{facility.total?.toLocaleString()} tCO2e</td>
+          {facilities && facilities.map((facility) => (
+            <tr key={facility.facility_id} className="border-b border-slate-700 hover:bg-slate-700/30">
+              <td className="py-3 px-4 text-white font-medium">{facility.facility_name}</td>
+              <td className="py-3 px-4 text-right text-slate-300">{facility.scope_1_tco2e?.toLocaleString(undefined, { maximumFractionDigits: 1 })} tCO2e</td>
+              <td className="py-3 px-4 text-right text-slate-300">{facility.scope_2_tco2e?.toLocaleString(undefined, { maximumFractionDigits: 1 })} tCO2e</td>
+              <td className="py-3 px-4 text-right text-slate-300">{facility.scope_3_tco2e?.toLocaleString(undefined, { maximumFractionDigits: 1 })} tCO2e</td>
+              <td className="py-3 px-4 text-right text-white font-semibold">{facility.total_tco2e?.toLocaleString(undefined, { maximumFractionDigits: 1 })} tCO2e</td>
             </tr>
           ))}
         </tbody>
