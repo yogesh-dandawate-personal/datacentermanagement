@@ -1,27 +1,30 @@
 {
   "version": 2,
-  "name": "netzero",
+  "name": "inetze ro",
   "public": false,
   "regions": ["sfo1"],
-  "builds": [
-    {
-      "src": "backend/app/main.py",
-      "use": "@vercel/python"
+  "buildCommand": "npm install --prefix frontend && npm run build --prefix frontend",
+  "outputDirectory": "frontend/dist",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "functions": {
+    "api/**/*.ts": {
+      "maxDuration": 60,
+      "memory": 3008
     }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "backend/app/main.py"
-    }
-  ],
-  "env": {
-    "PYTHONUNBUFFERED": "1",
-    "DATABASE_POOL_SIZE": "20",
-    "DATABASE_POOL_MAX_OVERFLOW": "40",
-    "DATABASE_POOL_PRE_PING": "true"
   },
-  "envPrefix": "DATABASE_,SECRET_KEY,API_KEY,",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/dashboard"
+    }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",
@@ -43,6 +46,18 @@
           "value": "Content-Type, Authorization"
         }
       ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
-  ]
+  ],
+  "env": {
+    "VITE_API_URL": "@vite_api_url"
+  }
 }
