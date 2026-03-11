@@ -105,10 +105,14 @@ class EmissionsCalculation(Base):
     calculation_period_end = Column(DateTime, nullable=False, index=True)
 
     scope = Column(String(20), nullable=False, index=True)  # scope1, scope2, scope3
+    scope_3_category = Column(String(50), nullable=True, index=True)  # supply_chain, business_travel, employee_commute, waste_disposal, purchased_goods, franchises, investments
     total_emissions_kgco2e = Column(Numeric(18, 6), nullable=False)  # kg CO2e
 
-    calculation_method = Column(String(100))  # average, sum, weighted_average, etc.
+    calculation_method = Column(String(100))  # average, sum, weighted_average, supply_chain_lifecycle, business_travel_distance_based, etc.
     factor_used_id = Column(UUID(as_uuid=True), ForeignKey("emission_factors.id", ondelete="SET NULL"), nullable=True)
+
+    # Calculation breakdown (JSON for flexible storage of mode/supplier/category breakdowns)
+    calculation_breakdown = Column(JSON, nullable=True)  # {'suppliers': {...}, 'by_mode': {...}, etc.}
 
     status = Column(String(50), default="draft", index=True)  # draft, finalized, approved
 
