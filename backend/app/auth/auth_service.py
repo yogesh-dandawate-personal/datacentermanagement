@@ -140,8 +140,7 @@ class AuthService:
 
 
 async def get_current_user_from_token(
-    authorization: Optional[str] = Header(None),
-    db: Optional[Session] = None
+    authorization: Optional[str] = Header(None)
 ) -> Dict[str, Any]:
     """
     Extract and verify current user from Authorization header
@@ -151,7 +150,6 @@ async def get_current_user_from_token(
 
     Args:
         authorization: Authorization header value
-        db: Database session (optional, not used for token validation)
 
     Returns:
         Dictionary with user_id, tenant_id, and roles

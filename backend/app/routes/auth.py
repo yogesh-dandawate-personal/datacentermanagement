@@ -23,7 +23,7 @@ router = APIRouter(prefix="/api/v1/auth", tags=["authentication"])
 @router.post("/login", response_model=LoginResponse, status_code=200)
 async def login(
     credentials: LoginRequest,
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """
     Login with email and password
@@ -123,7 +123,7 @@ async def login(
 @router.post("/refresh-token", response_model=LoginResponse, status_code=200)
 async def refresh_token_endpoint(
     request: RefreshTokenRequest,
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """
     Refresh access token using refresh token
@@ -197,7 +197,7 @@ async def refresh_token_endpoint(
 async def register(
     user_data: UserCreate,
     password: str,
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """
     Register a new user with email, password, and tenant
@@ -285,7 +285,7 @@ async def register(
 @router.post("/logout", status_code=204)
 async def logout(
     authorization: Optional[str] = Header(None),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """
     Logout (invalidate current session)
@@ -314,7 +314,7 @@ async def logout(
 @router.get("/me", response_model=UserResponse)
 async def get_current_user(
     current_user: dict = Depends(get_current_user_from_token),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """
     Get current authenticated user details

@@ -17,13 +17,13 @@ Implements comprehensive emissions tracking and ESG reporting:
 """
 
 from sqlalchemy import Column, String, DateTime, Boolean, ForeignKey, JSON, Integer, Text, Numeric
-from sqlalchemy.dialects.postgresql import UUID
+# from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from decimal import Decimal
 import uuid
 
-from app.models import Base
+from app.models import Base,UUID
 
 
 class EmissionsSource(Base):

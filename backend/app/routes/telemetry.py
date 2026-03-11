@@ -38,7 +38,7 @@ def get_current_user(authorization: str = Header(None)):
 async def ingest_reading(
     tenant_id: str,
     reading_data: dict,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -86,7 +86,7 @@ async def ingest_reading(
 async def ingest_batch(
     tenant_id: str,
     file: UploadFile = File(...),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -138,7 +138,7 @@ async def get_latest_readings(
     tenant_id: str,
     meter_ids: Optional[str] = Query(None),
     limit: int = Query(100, le=1000),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -180,7 +180,7 @@ async def get_history(
     meter_id: str = Query(...),
     start: str = Query(...),
     end: str = Query(...),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -225,7 +225,7 @@ async def get_anomalies(
     severity: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
     limit: int = Query(100, le=1000),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -262,7 +262,7 @@ async def get_anomalies(
 async def get_validation_errors(
     tenant_id: str,
     limit: int = Query(100, le=1000),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """Get validation errors from telemetry ingestion"""

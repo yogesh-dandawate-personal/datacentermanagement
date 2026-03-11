@@ -34,7 +34,7 @@ router = APIRouter(prefix="/api/v1", tags=["workflow"])
 async def create_workflow(
     entity_id: str,
     entity_type: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     x_user_id: str = Header(None),
 ):
     """Create new workflow"""
@@ -55,7 +55,7 @@ async def create_workflow(
 async def get_workflow(
     entity_id: str,
     entity_type: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """Get workflow status"""
     try:
@@ -70,7 +70,7 @@ async def get_workflow(
 async def get_workflow_history(
     entity_id: str,
     entity_type: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """Get workflow state history"""
     try:
@@ -94,7 +94,7 @@ async def create_approval(
     required_role: str,
     assigned_to: Optional[str] = None,
     due_date: Optional[str] = None,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """Create approval step"""
     try:
@@ -117,7 +117,7 @@ async def create_approval(
 async def list_pending_approvals(
     assigned_to: Optional[str] = None,
     entity_type: Optional[str] = None,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """List pending approvals"""
     try:
@@ -134,7 +134,7 @@ async def submit_approval(
     approval_id: str,
     decision: str,
     comment: Optional[str] = None,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     x_user_id: str = Header(None),
 ):
     """Submit approval decision"""
@@ -155,7 +155,7 @@ async def submit_approval(
 async def assign_approval(
     approval_id: str,
     assign_to: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """Assign approval to user"""
     try:
@@ -170,7 +170,7 @@ async def assign_approval(
 async def set_approval_due_date(
     approval_id: str,
     due_date: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """Set approval due date"""
     try:
@@ -192,7 +192,7 @@ async def add_approval_comment(
     approval_id: str,
     comment_text: str,
     comment_type: str = "comment",
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     x_user_id: str = Header(None),
 ):
     """Add comment to approval"""
@@ -212,7 +212,7 @@ async def add_approval_comment(
 @router.get("/approvals/{approval_id}/comments")
 async def get_approval_comments(
     approval_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """Get approval discussion thread"""
     try:
@@ -231,7 +231,7 @@ async def get_approval_comments(
 @router.get("/approvals/overdue")
 async def get_overdue_approvals(
     days: int = 0,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """Get overdue approvals"""
     try:
@@ -247,7 +247,7 @@ async def escalate_approval(
     approval_id: str,
     escalate_to: str,
     reason: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """Escalate approval"""
     try:
@@ -265,7 +265,7 @@ async def escalate_approval(
 @router.get("/approvals/escalation-check")
 async def check_escalations(
     days: int = 7,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     x_tenant_id: str = Header(None),
 ):
     """Check for approvals needing escalation"""

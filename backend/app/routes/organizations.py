@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1", tags=["organizations"])
 
 
-def get_current_user(authorization: str = Header(None), db: Session = Depends(get_db)):
+def get_current_user(authorization: str = Header(None), db = Depends(get_db)):
     """Extract and verify current user from token"""
     try:
         token = extract_token_from_header(authorization)
@@ -66,7 +66,7 @@ def build_organization_tree(org: Organization, db: Session) -> dict:
 @router.post("/orgs", response_model=OrganizationResponse, status_code=201)
 async def create_organization(
     org_data: OrganizationCreate,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
     """
@@ -126,7 +126,7 @@ async def create_organization(
 @router.get("/orgs/{org_id}", response_model=OrganizationResponse)
 async def get_organization(
     org_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
     """
@@ -153,7 +153,7 @@ async def get_organization(
 async def list_organizations(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
     """
@@ -191,7 +191,7 @@ async def list_organizations(
 async def update_organization(
     org_id: str,
     org_update: OrganizationUpdate,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
     """
@@ -234,7 +234,7 @@ async def update_organization(
 @router.delete("/orgs/{org_id}", status_code=204)
 async def delete_organization(
     org_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
     """
@@ -275,7 +275,7 @@ async def delete_organization(
 @router.get("/orgs/{org_id}/children")
 async def get_organization_children(
     org_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
     """
@@ -313,7 +313,7 @@ async def get_organization_children(
 @router.get("/orgs/{org_id}/tree")
 async def get_organization_tree(
     org_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
     """

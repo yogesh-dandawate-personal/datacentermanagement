@@ -1,10 +1,49 @@
-from sqlalchemy import Column, String, DateTime, Boolean, ForeignKey, Table, JSON, Integer, Text, Numeric
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, String, DateTime, Boolean, ForeignKey, Table, JSON, Integer, Text, Numeric, TypeDecorator, CHAR
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from decimal import Decimal
 import uuid
+
+
+class UUID(TypeDecorator):
+    """Platform-independent GUID type.
+
+    Uses PostgreSQL's UUID type, otherwise uses
+    CHAR(32), storing as stringified hex values.
+    """
+    impl = CHAR
+    cache_ok = True
+
+    def __init__(self, as_uuid=False):
+        self.as_uuid = as_uuid
+        super(UUID, self).__init__()
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == 'postgresql':
+            return dialect.type_descriptor(PG_UUID(as_uuid=self.as_uuid))
+        else:
+            return dialect.type_descriptor(CHAR(32))
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return value
+        elif dialect.name == 'postgresql':
+            return str(value)
+        else:
+            if not isinstance(value, uuid.UUID):
+                return "%.32x" % uuid.UUID(value).int
+            else:
+                return "%.32x" % value.int
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return value
+        else:
+            if not isinstance(value, uuid.UUID):
+                value = uuid.UUID(value)
+            return value
 
 Base = declarative_base()
 
@@ -817,6 +856,8 @@ class MarketplaceListing(Base):
     batch = relationship("CreditBatch", back_populates="listings")
     tenant = relationship("Tenant")
     trades = relationship("Trade", back_populates="listing", cascade="all, delete-orphan")
+    versions = relationship("ListingVersion", back_populates="listing", cascade="all, delete-orphan")
+    listing_metadata = relationship("ListingMetadata", back_populates="listing", cascade="all, delete-orphan", uselist=False)
 
 
 class Trade(Base):
@@ -849,6 +890,7 @@ class Trade(Base):
     buyer = relationship("Organization", foreign_keys=[buyer_id])
     seller_org = relationship("Organization", foreign_keys=[seller_id])
     tenant = relationship("Tenant")
+    settlement = relationship("TradeSettlement", back_populates="trade", uselist=False, cascade="all, delete-orphan")
 
 
 class CreditRetirement(Base):
@@ -893,6 +935,161 @@ class MarketplaceAnalytics(Base):
 
     # Relationships
     tenant = relationship("Tenant")
+
+
+class ListingVersion(Base):
+    """Version history for marketplace listing price/availability changes"""
+    __tablename__ = "listing_versions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    listing_id = Column(UUID(as_uuid=True), ForeignKey("marketplace_listings.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    version_number = Column(Integer, nullable=False)
+    price_snapshot = Column(Numeric(12, 2), nullable=False)  # Price at this version
+    availability_snapshot = Column(Integer, nullable=False)  # Quantity available
+    change_type = Column(String(50), nullable=False, index=True)  # price_update, availability_update, reactivated
+
+    changed_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    changed_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    # Relationships
+    listing = relationship("MarketplaceListing", back_populates="versions")
+    changed_by_user = relationship("User", foreign_keys=[changed_by])
+
+
+class ListingMetadata(Base):
+    """Search metadata and cached metrics for marketplace listings"""
+    __tablename__ = "listing_metadata"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    listing_id = Column(UUID(as_uuid=True), ForeignKey("marketplace_listings.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    tags = Column(JSON, default=list)  # Array of searchable tags
+    search_keywords = Column(Text)  # Denormalized for full-text search
+
+    seller_rating = Column(Numeric(3, 2))  # Cached from reviews (0-5.0)
+    review_count = Column(Integer, default=0)
+    popularity_score = Column(Numeric(8, 2))  # Based on views and trades
+
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    # Relationships
+    listing = relationship("MarketplaceListing", back_populates="listing_metadata", uselist=False)
+
+
+class TradeMatch(Base):
+    """Matching algorithm results for buy/sell orders"""
+    __tablename__ = "trade_matches"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    buy_order_id = Column(UUID(as_uuid=True), ForeignKey("trades.id", ondelete="CASCADE"), nullable=False, index=True)
+    sell_order_id = Column(UUID(as_uuid=True), ForeignKey("trades.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    match_price = Column(Numeric(12, 2), nullable=False)  # Final matched price
+    match_quantity = Column(Integer, nullable=False)  # Quantity matched
+
+    matched_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    match_score = Column(Numeric(3, 2))  # Quality of match (0-1)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    # Relationships
+    buy_order = relationship("Trade", foreign_keys=[buy_order_id], backref="buy_matches")
+    sell_order = relationship("Trade", foreign_keys=[sell_order_id], backref="sell_matches")
+
+
+class TradeSettlement(Base):
+    """Settlement tracking after trade execution"""
+    __tablename__ = "trade_settlements"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    trade_id = Column(UUID(as_uuid=True), ForeignKey("trades.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    settlement_type = Column(String(50), nullable=False)  # credits, payment, both
+    settlement_status = Column(String(50), default="pending", index=True)  # pending, completed, failed
+
+    settled_amount = Column(Numeric(18, 2), nullable=False)
+    settlement_date = Column(DateTime, nullable=True)
+
+    confirmed_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    settlement_log = Column(JSON, default=dict)  # Audit trail
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    trade = relationship("Trade", back_populates="settlement", uselist=False)
+    confirmed_by_user = relationship("User", foreign_keys=[confirmed_by])
+
+
+class Portfolio(Base):
+    """Portfolio for managing carbon credit holdings"""
+    __tablename__ = "portfolios"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    portfolio_name = Column(String(255), nullable=False, index=True)
+    portfolio_type = Column(String(50), nullable=False)  # investment, compliance, hedging
+    description = Column(Text)
+
+    status = Column(String(50), default="active", index=True)  # active, closed, suspended
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+
+    # Relationships
+    organization = relationship("Organization")
+    tenant = relationship("Tenant")
+    creator = relationship("User", foreign_keys=[created_by])
+    positions = relationship("PortfolioPosition", back_populates="portfolio", cascade="all, delete-orphan")
+    performance = relationship("PortfolioPerformance", back_populates="portfolio", cascade="all, delete-orphan")
+
+
+class PortfolioPosition(Base):
+    """Individual holding in portfolio"""
+    __tablename__ = "portfolio_positions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    portfolio_id = Column(UUID(as_uuid=True), ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False, index=True)
+    listing_id = Column(UUID(as_uuid=True), ForeignKey("marketplace_listings.id", ondelete="SET NULL"), nullable=True, index=True)
+
+    quantity = Column(Integer, nullable=False)
+    cost_basis = Column(Numeric(12, 2), nullable=False)  # Average price paid per credit
+    current_value = Column(Numeric(18, 2), nullable=False)  # Current market value
+
+    last_updated = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    # Relationships
+    portfolio = relationship("Portfolio", back_populates="positions")
+    listing = relationship("MarketplaceListing")
+
+
+class PortfolioPerformance(Base):
+    """Performance metrics tracking for portfolios"""
+    __tablename__ = "portfolio_performance"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    portfolio_id = Column(UUID(as_uuid=True), ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    date = Column(DateTime, nullable=False, index=True)
+    total_value = Column(Numeric(18, 2), nullable=False)
+
+    daily_return = Column(Numeric(8, 4))  # Daily return percentage
+    cumulative_return = Column(Numeric(12, 4))  # Cumulative return percentage
+
+    portfolio_composition = Column(JSON, default=dict)  # Snapshot of allocation
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    # Relationships
+    portfolio = relationship("Portfolio", back_populates="performance")
 
 
 # ============================================================================

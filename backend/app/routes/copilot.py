@@ -42,7 +42,7 @@ def get_current_user(authorization: str = Header(None)):
         raise HTTPException(status_code=401, detail="Invalid or missing token")
 
 
-def get_copilot_service(db: Session = Depends(get_db)) -> CopilotService:
+def get_copilot_service(db = Depends(get_db)) -> CopilotService:
     """Initialize copilot service with dependencies"""
     vector_store = VectorStoreService(db, None)  # None for embedding client
     claude_client = ClaudeClient()
@@ -53,7 +53,7 @@ def get_copilot_service(db: Session = Depends(get_db)) -> CopilotService:
 async def ask_copilot(
     tenant_id: str,
     question_data: dict,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -121,7 +121,7 @@ async def get_copilot_history(
     tenant_id: str,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -182,7 +182,7 @@ async def get_copilot_history(
 async def get_response_details(
     tenant_id: str,
     response_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -283,7 +283,7 @@ async def get_response_details(
 async def submit_response_feedback(
     tenant_id: str,
     feedback_data: dict,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -358,7 +358,7 @@ async def get_similar_questions(
     tenant_id: str,
     q: str = Query(..., min_length=3, max_length=500, description="Question to find similar to"),
     limit: int = Query(5, ge=1, le=20),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -402,7 +402,7 @@ async def get_similar_questions(
 @router.get("/tenants/{tenant_id}/copilot/stats")
 async def get_copilot_stats(
     tenant_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """

@@ -58,7 +58,7 @@ async def create_credit_batch(
     vintage_year: int = Query(...),
     description: Optional[str] = Query(None),
     quality_score: float = Query(100),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -110,7 +110,7 @@ async def create_credit_batch(
 async def list_organization_credits(
     org_id: str,
     status: str = Query("active"),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -140,7 +140,7 @@ async def retire_credits(
     credit_id: str,
     quantity: float = Query(...),
     reason: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -185,7 +185,7 @@ async def create_listing(
     listing_type: str = Query("fixed_price"),
     expires_in_days: int = Query(30),
     minimum_bid: Optional[float] = Query(None),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -230,7 +230,7 @@ async def list_marketplace_listings(
     min_price: Optional[float] = Query(None),
     max_price: Optional[float] = Query(None),
     limit: int = Query(100),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -260,7 +260,7 @@ async def list_marketplace_listings(
 @router.get("/marketplace/listings/{listing_id}")
 async def get_listing(
     listing_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """Get detailed information about a specific listing"""
@@ -300,7 +300,7 @@ async def execute_trade(
     listing_id: str = Query(...),
     quantity: float = Query(...),
     agreed_price: Optional[float] = Query(None),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -339,7 +339,7 @@ async def get_trade_history(
     org_id: str,
     role: str = Query("all"),  # buyer, seller, all
     limit: int = Query(100),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -367,7 +367,7 @@ async def get_trade_history(
 async def complete_trade(
     trade_id: str,
     payment_confirmed: bool = Query(True),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """Complete a trade and update its status"""
@@ -397,7 +397,7 @@ async def complete_trade(
 @router.get("/marketplace/analytics/price-history")
 async def get_price_history(
     days: int = Query(30),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """Get historical price data for market trend analysis"""
@@ -424,7 +424,7 @@ async def get_price_history(
 @router.get("/marketplace/analytics/volume")
 async def get_trading_volume(
     days: int = Query(30),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """Get trading volume and activity metrics"""
@@ -441,7 +441,7 @@ async def get_trading_volume(
 
 @router.get("/marketplace/analytics/market-insights")
 async def get_market_insights(
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """Get comprehensive market insights and recommendations"""

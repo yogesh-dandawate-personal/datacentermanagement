@@ -37,7 +37,7 @@ async def create_report(
     report_type: str,
     reporting_period: str,
     fiscal_year: int,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     x_tenant_id: str = Header(None),
     x_user_id: str = Header(None),
 ):
@@ -60,7 +60,7 @@ async def create_report(
 @router.get("/organizations/{org_id}/reports")
 async def list_reports(
     org_id: UUID,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     x_tenant_id: str = Header(None),
 ):
     """List all reports for organization"""
@@ -76,7 +76,7 @@ async def list_reports(
 async def get_report(
     org_id: UUID,
     report_id: UUID,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """Get report details"""
     try:
@@ -111,7 +111,7 @@ async def update_report(
     scope_1: Optional[float] = None,
     scope_2: Optional[float] = None,
     scope_3: Optional[float] = None,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """Update report emissions data"""
     try:
@@ -148,7 +148,7 @@ async def update_report(
 async def submit_report(
     org_id: UUID,
     report_id: UUID,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     x_user_id: str = Header(None),
 ):
     """Submit report for approval"""
@@ -164,7 +164,7 @@ async def submit_report(
 async def approve_report(
     org_id: UUID,
     report_id: UUID,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     x_user_id: str = Header(None),
 ):
     """Approve report"""
@@ -181,7 +181,7 @@ async def export_report(
     org_id: UUID,
     report_id: UUID,
     format: str = "json",
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """Export report in specified format"""
     try:
@@ -202,7 +202,7 @@ async def create_report_section(
     report_id: UUID,
     section_name: str,
     content: dict,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """Create a report section"""
     try:
@@ -232,7 +232,7 @@ async def create_report_section(
 @router.get("/reports/{report_id}/sections")
 async def get_report_sections(
     report_id: UUID,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """Get all sections of a report"""
     try:
@@ -263,7 +263,7 @@ async def update_report_section(
     section_id: UUID,
     completion_percentage: Optional[int] = None,
     content: Optional[dict] = None,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """Update report section"""
     try:
@@ -301,7 +301,7 @@ async def update_report_section(
 async def get_audit_trail(
     org_id: UUID,
     days: int = 90,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """Get audit trail for organization"""
     try:
@@ -316,7 +316,7 @@ async def get_audit_trail(
 async def get_entity_audit_trail(
     org_id: UUID,
     entity_id: UUID,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """Get audit trail for specific entity"""
     try:
@@ -362,7 +362,7 @@ async def create_compliance_target(
     baseline_value: float,
     target_year: int,
     target_value: float,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     x_tenant_id: str = Header(None),
 ):
     """Create a compliance target"""
@@ -386,7 +386,7 @@ async def create_compliance_target(
 @router.get("/organizations/{org_id}/targets")
 async def get_compliance_targets(
     org_id: UUID,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """List compliance targets"""
     try:
@@ -418,7 +418,7 @@ async def update_compliance_target(
     org_id: UUID,
     target_id: UUID,
     current_value: Optional[float] = None,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ):
     """Update compliance target with progress"""
     try:
@@ -440,7 +440,7 @@ async def update_compliance_target(
 @router.get("/organizations/{org_id}/benchmarks")
 async def get_organization_benchmarks(
     org_id: UUID,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     x_tenant_id: str = Header(None),
 ):
     """Get benchmarks for organization"""
@@ -456,7 +456,7 @@ async def get_organization_benchmarks(
 async def get_peer_comparison(
     org_id: UUID,
     metric_name: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     x_tenant_id: str = Header(None),
 ):
     """Get peer comparison for metric"""

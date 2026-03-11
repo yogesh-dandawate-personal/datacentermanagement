@@ -13,10 +13,12 @@ import { Compliance } from './pages/Compliance'
 import { Analytics } from './pages/Analytics'
 import { Benchmarking } from './pages/Benchmarking'
 import { Alerts } from './pages/Alerts'
+import { Emissions } from './pages/Emissions'
 import { Layout } from './components/Layout'
 import { AuthProvider } from './context/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { ListingDetail } from './components/marketplace'
 
 function App() {
   return (
@@ -74,6 +76,16 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Marketplace />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marketplace/:id"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ListingDetail />
                 </Layout>
               </ProtectedRoute>
             }
@@ -154,6 +166,16 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Alerts />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/emissions"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Emissions />
                 </Layout>
               </ProtectedRoute>
             }

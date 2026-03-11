@@ -37,7 +37,7 @@ async def list_emission_factors(
     tenant_id: str,
     factor_type: Optional[str] = Query(None),
     region: Optional[str] = Query("Global"),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -86,7 +86,7 @@ async def list_emission_factors(
 @router.get("/factors/{factor_id}/versions")
 async def get_factor_versions(
     factor_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -119,7 +119,7 @@ async def calculate_emissions(
     period_start: str = Query(...),
     period_end: str = Query(...),
     region: str = Query("US-East"),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -167,7 +167,7 @@ async def calculate_emissions(
 @router.get("/carbon-calculations/{calc_id}")
 async def get_calculation(
     calc_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -192,7 +192,7 @@ async def get_calculation(
 async def submit_for_review(
     calc_id: str,
     comments: str = Query(""),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -221,7 +221,7 @@ async def submit_for_review(
 async def approve_calculation(
     calc_id: str,
     approval_notes: str = Query(""),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -259,7 +259,7 @@ async def approve_calculation(
 async def recalculate_emissions(
     calc_id: str,
     region: str = Query("US-East"),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """

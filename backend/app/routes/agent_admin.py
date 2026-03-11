@@ -51,7 +51,7 @@ def check_admin_role(current_user: dict):
 
 @router.get("/runs")
 async def list_agent_runs(
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
     agent_type: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
@@ -101,7 +101,7 @@ async def list_agent_runs(
 @router.get("/runs/{run_id}")
 async def get_agent_run(
     run_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -147,7 +147,7 @@ async def get_agent_run(
 
 @router.get("/violations")
 async def list_guardrail_violations(
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
     severity: Optional[str] = Query(None),
     resolved: bool = Query(False),
@@ -189,7 +189,7 @@ async def list_guardrail_violations(
 
 @router.get("/decisions-pending")
 async def list_pending_decisions(
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
     impact_level: Optional[str] = Query(None),
     limit: int = Query(100, ge=1, le=1000),
@@ -251,7 +251,7 @@ async def list_pending_decisions(
 @router.patch("/decisions/{decision_id}/approve")
 async def approve_decision(
     decision_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
     request_body: Optional[dict] = None,
 ):
@@ -320,7 +320,7 @@ async def approve_decision(
 @router.patch("/decisions/{decision_id}/reject")
 async def reject_decision(
     decision_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
     request_body: Optional[dict] = None,
 ):
@@ -386,7 +386,7 @@ async def reject_decision(
 @router.patch("/violations/{violation_id}/resolve")
 async def resolve_violation(
     violation_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
     request_body: Optional[dict] = None,
 ):
@@ -447,7 +447,7 @@ async def resolve_violation(
 
 @router.get("/stats")
 async def get_agent_stats(
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
     days: int = Query(30, ge=1, le=365),
 ):

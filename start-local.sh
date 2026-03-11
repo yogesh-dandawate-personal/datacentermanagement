@@ -1,103 +1,110 @@
 #!/bin/bash
 
-# Sprint 8 Local Deployment Script
-# Starts both backend and frontend servers
+# Local Development Server Startup Script for iNetZero
+# Starts both Frontend (React) and Backend (FastAPI) servers
 
 set -e
 
-PROJECT_DIR="/Users/yogesh/00_MyCode/01_PersonalProjects/datacentermanagement"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$PROJECT_DIR"
 
-echo "🚀 Starting Sprint 8 Local Deployment"
-echo "======================================"
+# Colors for output
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
+echo -e "${CYAN}║  iNetZero - Local Development Server Startup                ║${NC}"
+echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
-# Check if Node/npm is available
-if ! command -v npm &> /dev/null; then
-    echo "❌ npm not found. Please install Node.js"
+# Check Node.js
+echo -e "${YELLOW}[1/5] Checking Node.js...${NC}"
+if ! command -v node &> /dev/null; then
+    echo -e "${RED}✗ Node.js not found. Please install Node.js 18+${NC}"
     exit 1
 fi
+NODE_VERSION=$(node -v)
+echo -e "${GREEN}✓ Node.js ${NODE_VERSION}${NC}"
+echo ""
 
-# Check if Python is available
+# Check Python
+echo -e "${YELLOW}[2/5] Checking Python 3...${NC}"
 if ! command -v python3 &> /dev/null; then
-    echo "❌ Python 3 not found. Please install Python 3"
+    echo -e "${RED}✗ Python 3 not found. Please install Python 3.9+${NC}"
     exit 1
 fi
-
-echo "✅ Environment checks passed"
+PYTHON_VERSION=$(python3 --version)
+echo -e "${GREEN}✓ ${PYTHON_VERSION}${NC}"
 echo ""
 
-# Kill any existing processes on ports 8000 and 5173
-echo "🔍 Checking for existing processes..."
-lsof -i :8000 2>/dev/null && kill -9 $(lsof -ti :8000) && echo "   Killed process on port 8000" || echo "   Port 8000 clear"
-lsof -i :5173 2>/dev/null && kill -9 $(lsof -ti :5173) && echo "   Killed process on port 5173" || echo "   Port 5173 clear"
-echo ""
-
-echo "📦 Checking dependencies..."
-cd "$PROJECT_DIR/frontend"
-if [ ! -d "node_modules" ]; then
-    echo "   Installing npm packages..."
-    npm install --silent
-else
-    echo "   npm packages already installed"
+# Check/Install frontend dependencies
+echo -e "${YELLOW}[3/5] Checking frontend dependencies...${NC}"
+if [ ! -d "frontend/node_modules" ]; then
+    echo -e "${YELLOW}Installing frontend dependencies...${NC}"
+    cd frontend && npm install && cd ..
 fi
+echo -e "${GREEN}✓ Frontend dependencies ready${NC}"
 echo ""
 
-echo "✅ Ready to start servers!"
+# Check/Install backend dependencies
+echo -e "${YELLOW}[4/5] Checking backend dependencies...${NC}"
+if ! python3 -c "import fastapi" 2>/dev/null; then
+    echo -e "${YELLOW}Installing backend dependencies...${NC}"
+    cd backend && python3 -m pip install -q -r requirements.txt && cd ..
+fi
+echo -e "${GREEN}✓ Backend dependencies ready${NC}"
 echo ""
-echo "Starting servers in background..."
+
+# Start services
+echo -e "${YELLOW}[5/5] Starting services...${NC}"
 echo ""
+
+echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
+echo -e "${BLUE}║  Services Starting                                         ║${NC}"
+echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
+echo ""
+
+echo -e "${GREEN}Frontend:${NC} http://localhost:3000"
+echo -e "${GREEN}Backend:${NC}  http://localhost:8000"
+echo -e "${GREEN}API Docs:${NC} http://localhost:8000/api/docs"
+echo ""
+echo -e "${YELLOW}Press Ctrl+C to stop all services${NC}"
+echo ""
+
+# Function to cleanup on exit
+cleanup() {
+    echo ""
+    echo -e "${YELLOW}Stopping services...${NC}"
+    kill %1 %2 2>/dev/null || true
+    echo -e "${GREEN}✓ Services stopped${NC}"
+    exit 0
+}
+
+# Set up trap to handle Ctrl+C
+trap cleanup SIGINT SIGTERM
 
 # Start backend in background
-echo "📡 Starting Backend API (Port 8000)..."
-cd "$PROJECT_DIR"
-python3 -m uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000 > /tmp/backend.log 2>&1 &
+echo -e "${YELLOW}Starting Backend (FastAPI)...${NC}"
+cd backend && python3 -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 &
 BACKEND_PID=$!
-echo "   Backend PID: $BACKEND_PID"
+cd ..
 
-# Wait for backend to start
+# Give backend a moment to start
 sleep 3
 
 # Start frontend in background
-echo "🎨 Starting Frontend (Port 5173)..."
-cd "$PROJECT_DIR/frontend"
-npm run dev > /tmp/frontend.log 2>&1 &
+echo -e "${YELLOW}Starting Frontend (React)...${NC}"
+cd frontend && BROWSER=none npm start &
 FRONTEND_PID=$!
-echo "   Frontend PID: $FRONTEND_PID"
-
-# Wait for frontend to start
-sleep 3
+cd ..
 
 echo ""
-echo "======================================"
-echo "✅ SPRINT 8 IS NOW RUNNING LOCALLY!"
-echo "======================================"
-echo ""
-echo "🌐 Frontend:  http://localhost:5173"
-echo "📡 Backend:   http://127.0.0.1:8000"
-echo "📚 API Docs:  http://127.0.0.1:8000/api/docs"
-echo ""
-echo "📝 Test Pages:"
-echo "   - Marketplace: /marketplace"
-echo "   - Portfolio:   /portfolio"
-echo "   - Trading:     /trading"
-echo ""
-echo "📊 Backend Tests:"
-echo "   python3 -m pytest backend/tests/test_marketplace_service.py -v"
-echo ""
-echo "🛑 To stop servers:"
-echo "   kill $BACKEND_PID  # Stop backend"
-echo "   kill $FRONTEND_PID # Stop frontend"
-echo ""
-echo "📋 Logs:"
-echo "   Backend:  tail -f /tmp/backend.log"
-echo "   Frontend: tail -f /tmp/frontend.log"
-echo ""
-echo "Press Ctrl+C to view this menu again"
+echo -e "${GREEN}✓ All services started${NC}"
 echo ""
 
-# Save PIDs for easy cleanup
-echo "$BACKEND_PID" > /tmp/sprint8-backend.pid
-echo "$FRONTEND_PID" > /tmp/sprint8-frontend.pid
-
-# Keep script running
-wait
+# Wait for both processes
+wait %1 %2 2>/dev/null || true

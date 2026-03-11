@@ -10,14 +10,14 @@ Implements Copilot conversation tracking and response management:
 """
 
 from sqlalchemy import Column, String, DateTime, Boolean, ForeignKey, Table, JSON, Integer, Text, Numeric, ARRAY, Enum as SAEnum
-from sqlalchemy.dialects.postgresql import UUID
+# from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from decimal import Decimal
 import uuid
 import enum
 
-from app.models import Base
+from app.models import Base,UUID
 
 # Try to import pgvector Vector type, fallback to ARRAY(Float)
 try:
@@ -40,8 +40,8 @@ class CopilotQuery(Base):
     question_normalized = Column(Text)  # Cleaned/normalized version for search
 
     # Embedding vector for semantic search (1536 dimensions for OpenAI/Claude)
-    # Uses pgvector if available, falls back to ARRAY(Numeric) otherwise
-    embedding = Column(Vector(1536) if Vector else ARRAY(Numeric(10, 6)), nullable=True, index=True)
+    # Uses pgvector if available, falls back to JSON list otherwise
+    embedding = Column(Vector(1536) if Vector else JSON, nullable=True, index=True)
 
     # Query classification and metadata
     query_type = Column(String(50), nullable=True, index=True)  # metric, calculation, target, benchmark, etc.
@@ -202,7 +202,7 @@ class CopilotFeedback(Base):
 
     # Detailed feedback
     comment = Column(Text, nullable=True)
-    issues = Column(ARRAY(String), nullable=True)  # List of issues identified: [missing_data, incorrect_calculation, fabrication, etc]
+    issues = Column(JSON, default=list, nullable=True)  # List of issues identified: [missing_data, incorrect_calculation, fabrication, etc]
 
     # Issues details
     has_missing_data = Column(Boolean, default=False)

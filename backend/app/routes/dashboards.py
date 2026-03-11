@@ -33,7 +33,7 @@ def get_current_user(authorization: str = Header(None)):
 @router.get("/organizations/{org_id}/dashboards/energy")
 async def get_energy_dashboard(
     org_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -61,7 +61,7 @@ async def get_energy_metrics(
     org_id: Optional[str] = Query(None),
     facility_id: Optional[str] = Query(None),
     days_back: int = Query(7, le=90),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -112,7 +112,7 @@ async def get_energy_metrics(
 async def get_facility_efficiency(
     facility_id: str,
     days_back: int = Query(7, le=90),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -148,7 +148,7 @@ async def get_meter_peak_usage(
     meter_id: str,
     days_back: int = Query(30, le=365),
     limit: int = Query(10, le=100),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """

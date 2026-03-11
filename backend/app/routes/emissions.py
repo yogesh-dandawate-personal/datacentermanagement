@@ -45,7 +45,7 @@ async def get_emission_sources(
     scope: Optional[str] = Query(None),
     is_active: Optional[bool] = Query(None),
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Get emission sources for organization"""
     try:
@@ -92,7 +92,7 @@ async def create_emission_source(
     org_id: str,
     source_data: dict,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Create a new emission source"""
     try:
@@ -135,7 +135,7 @@ async def submit_activity_data(
     activity_value: Decimal,
     activity_unit: str,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Submit single activity data reading"""
     try:
@@ -162,7 +162,7 @@ async def upload_batch_file(
     file: UploadFile = File(...),
     source_id: Optional[str] = Form(None),
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Upload batch CSV file with activity data"""
     try:
@@ -198,7 +198,7 @@ async def get_activity_data(
     limit: int = Query(100),
     offset: int = Query(0),
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Query activity data with filters"""
     try:
@@ -251,7 +251,7 @@ async def calculate_scope1(
     period_start: datetime,
     period_end: datetime,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Trigger Scope 1 emissions calculation"""
     try:
@@ -279,7 +279,7 @@ async def calculate_scope2(
     period_start: datetime,
     period_end: datetime,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Trigger Scope 2 emissions calculation"""
     try:
@@ -307,7 +307,7 @@ async def calculate_scope3(
     period_start: datetime,
     period_end: datetime,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Trigger Scope 3 emissions calculation"""
     try:
@@ -335,7 +335,7 @@ async def get_calculations(
     status: Optional[str] = Query(None),
     limit: int = Query(100),
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Query calculations with filters"""
     try:
@@ -382,7 +382,7 @@ async def get_facility_dashboard(
     facility_id: str,
     period: str = Query("current_month"),
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Get facility emissions dashboard"""
     try:
@@ -406,7 +406,7 @@ async def get_portfolio_overview(
     org_id: str,
     period: str = Query("current_year"),
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Get portfolio-wide emissions overview"""
     try:
@@ -432,7 +432,7 @@ async def get_portfolio_overview(
 async def get_emission_targets(
     org_id: str,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Get emission reduction targets"""
     try:
@@ -467,7 +467,7 @@ async def create_emission_target(
     org_id: str,
     target_data: dict,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Create emission reduction target"""
     try:
@@ -509,7 +509,7 @@ async def get_emissions_alerts(
     status: Optional[str] = Query(None),
     limit: int = Query(100),
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Get emission alerts"""
     try:
@@ -551,7 +551,7 @@ async def get_emissions_alerts(
 async def get_alert_rules(
     org_id: str,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Get alert rule definitions"""
     try:
@@ -586,7 +586,7 @@ async def create_alert_rule(
     org_id: str,
     rule_data: dict,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Create alert rule"""
     try:

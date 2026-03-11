@@ -43,7 +43,7 @@ def get_current_user(authorization: str = Header(None)):
 @router.get("/organizations/{org_id}/kpis")
 async def list_kpis(
     org_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -85,7 +85,7 @@ async def list_kpis(
 @router.get("/kpis/{kpi_id}")
 async def get_kpi(
     kpi_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -154,7 +154,7 @@ async def calculate_kpi(
     org_id: str,
     kpi_name: str,
     period_days: int = Query(7),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -243,7 +243,7 @@ async def calculate_kpi(
 async def get_kpi_snapshots(
     kpi_id: str,
     days: int = Query(30),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -280,7 +280,7 @@ async def create_threshold(
     notify_email: bool = Query(True),
     notify_slack: bool = Query(False),
     notify_webhook: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -327,7 +327,7 @@ async def create_threshold(
 @router.get("/kpis/{kpi_id}/thresholds")
 async def list_thresholds(
     kpi_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -370,7 +370,7 @@ async def get_breaches(
     kpi_id: str,
     status: Optional[str] = Query(None),  # open, acknowledged, resolved
     limit: int = Query(100),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -403,7 +403,7 @@ async def get_breaches(
 async def acknowledge_breach(
     breach_id: str,
     resolution_notes: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """

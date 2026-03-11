@@ -108,7 +108,7 @@ async def export_report_pdf(
     report_id: UUID,
     landscape: bool = False,
     x_user_id: str = Header(None),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ) -> StreamingResponse:
     """
     Export report as PDF
@@ -172,7 +172,7 @@ async def export_report_excel(
     tenant_id: UUID,
     report_id: UUID,
     x_user_id: str = Header(None),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ) -> StreamingResponse:
     """
     Export report as Excel workbook
@@ -234,7 +234,7 @@ async def export_report_json(
     report_id: UUID,
     format: str = "flat",
     x_user_id: str = Header(None),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ) -> dict:
     """
     Export report as JSON
@@ -315,7 +315,7 @@ async def get_export_status(
     tenant_id: UUID,
     report_id: UUID,
     x_user_id: str = Header(None),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
 ) -> dict:
     """
     Check export status and available formats

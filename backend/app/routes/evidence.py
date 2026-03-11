@@ -48,7 +48,7 @@ async def upload_evidence(
     category: str = Form(...),
     name: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -113,7 +113,7 @@ async def list_evidence(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
     include_deleted: bool = Query(False),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -175,7 +175,7 @@ async def list_evidence(
 async def get_evidence(
     tenant_id: str,
     evidence_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -213,7 +213,7 @@ async def update_evidence(
     name: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
     category: Optional[str] = Form(None),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -267,7 +267,7 @@ async def delete_evidence(
     tenant_id: str,
     evidence_id: str,
     hard_delete: bool = Query(False),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -315,7 +315,7 @@ async def link_evidence(
     linked_to_type: str = Form(...),
     linked_to_id: str = Form(...),
     link_type: str = Form("supports"),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -367,7 +367,7 @@ async def link_evidence(
 async def download_evidence(
     tenant_id: str,
     evidence_id: str,
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -410,7 +410,7 @@ async def get_download_url(
     tenant_id: str,
     evidence_id: str,
     expires_in_seconds: int = Query(3600, ge=60, le=86400),
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
